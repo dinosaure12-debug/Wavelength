@@ -502,41 +502,44 @@ function renderPair(){
 function pctToAngle(pct){
   // 0% = gauche (PI), 100% = droite (0)
   return Math.PI - (pct/100) * Math.PI;
+function bandColorForPct(pct){
+  const d = Math.abs(pct - secret);
+  if (d <= Z_GREEN)  return "rgba(34,197,94,.80)";   // vert
+  if (d <= Z_ORANGE) return "rgba(245,158,11,.80)";  // orange
+  if (d <= Z_RED)    return "rgba(239,68,68,.80)";   // rouge
+  return null;
 }
-function drawArcSegment(fromPct, toPct, color, cx, cy, r){
-  const aPct = clamp(fromPct, 0, 100);
-  const bPct = clamp(toPct, 0, 100);
-  if (bPct <= aPct) return;
 
-  let start = pctToAngle(aPct);
-  let end   = pctToAngle(bPct);
+function drawScoringBandsSampled(cx, cy, r){
+  const ringR = r - 20;     // anneau intérieur
+  const lw = 20;            // épaisseur des bandes
+  const step = 0.25;        // précision: plus petit = plus lisse (0.25 ou 0.5)
 
-  // IMPORTANT: on force le bon sens (sinon arc() prend le grand chemin)
-  if (start < end) { const tmp = start; start = end; end = tmp; }
+  // On ne peint que dans [secret-8 ; secret+8] pour perf + clarté
+  const startPct = clamp(secret - Z_RED, 0, 100);
+  const endPct   = clamp(secret + Z_RED, 0, 100);
 
   ctx.save();
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 20;     // anneau fin
+  ctx.lineWidth = lw;
   ctx.lineCap = "butt";
-  ctx.beginPath();
-  ctx.arc(cx, cy, r - 20, start, end, false);
-  ctx.stroke();
+
+  for(let p = startPct; p < endPct; p += step){
+    const p2 = Math.min(p + step, endPct);
+
+    const col = bandColorForPct((p + p2) / 2);
+    if(!col) continue;
+
+    const a1 = pctToAngle(p);
+    const a2 = pctToAngle(p2);
+
+    ctx.strokeStyle = col;
+    ctx.beginPath();
+    ctx.arc(cx, cy, ringR, a1, a2, false);
+    ctx.stroke();
+  }
+
   ctx.restore();
 }
-
-function drawScoringBands(cx, cy, r){
-  const s = secret;
-
-  // Vert : [s-3 ; s+3]
-  drawArcSegment(s - Z_GREEN, s + Z_GREEN, "rgba(34,197,94,.70)", cx, cy, r);
-
-  // Orange : (s-5 ; s-3] et [s+3 ; s+5)
-  drawArcSegment(s - Z_ORANGE, s - Z_GREEN, "rgba(245,158,11,.70)", cx, cy, r);
-  drawArcSegment(s + Z_GREEN,  s + Z_ORANGE,"rgba(245,158,11,.70)", cx, cy, r);
-
-  // Rouge : (s-8 ; s-5] et [s+5 ; s+8)
-  drawArcSegment(s - Z_RED,    s - Z_ORANGE,"rgba(239,68,68,.70)", cx, cy, r);
-  drawArcSegment(s + Z_ORANGE, s + Z_RED,   "rgba(239,68,68,.70)", cx, cy, r);
 }
 function drawBaseArc(cx,cy,r){
   ctx.save();
@@ -591,7 +594,7 @@ function drawDial({mode}){
   drawBaseArc(cx,cy,r);
 
   if(mode === "reveal"){
-  drawScoringBands(cx, cy, r);
+  drawScoringBandsSampled(cx, cy, r);
 }
 
   // Center hub
