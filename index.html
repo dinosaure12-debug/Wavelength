@@ -504,21 +504,22 @@ function pctToAngle(pct){
   return Math.PI - (pct/100) * Math.PI;
 }
 function drawArcSegment(fromPct, toPct, color, cx, cy, r){
-  const a = clamp(fromPct, 0, 100);
-  const b = clamp(toPct, 0, 100);
+  const aPct = clamp(fromPct, 0, 100);
+  const bPct = clamp(toPct, 0, 100);
+  if (bPct <= aPct) return;
 
-  // Si segment vide
-  if(b <= a) return;
+  let start = pctToAngle(aPct);
+  let end   = pctToAngle(bPct);
 
-  const aStart = pctToAngle(a); // angle "gauche" (plus grand)
-  const aEnd   = pctToAngle(b); // angle "droite" (plus petit)
+  // IMPORTANT: on force le bon sens (sinon arc() prend le grand chemin)
+  if (start < end) { const tmp = start; start = end; end = tmp; }
 
   ctx.save();
   ctx.strokeStyle = color;
   ctx.lineWidth = 20;     // anneau fin
   ctx.lineCap = "butt";
   ctx.beginPath();
-  ctx.arc(cx, cy, r - 20, aStart, aEnd, false);
+  ctx.arc(cx, cy, r - 20, start, end, false);
   ctx.stroke();
   ctx.restore();
 }
