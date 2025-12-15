@@ -13,7 +13,6 @@
   --text:#f9fafb;
   --muted:rgba(255,255,255,.70);
   --accent:#f97316;
-
   --green:#22c55e;
   --orange:#f59e0b;
   --red:#ef4444;
@@ -23,26 +22,25 @@
 
 body{
   margin:0;
-  font-family: Arial, sans-serif;
-  background:
-    radial-gradient(900px 500px at 20% 0%, rgba(249,115,22,.12), transparent 60%),
-    radial-gradient(900px 500px at 80% 10%, rgba(59,130,246,.10), transparent 60%),
-    var(--bg);
-  color: var(--text);
-  padding: 12px;
+  font-family:Arial,sans-serif;
+  background: radial-gradient(900px 500px at 20% 0%, rgba(249,115,22,.12), transparent 60%),
+              radial-gradient(900px 500px at 80% 10%, rgba(59,130,246,.10), transparent 60%),
+              var(--bg);
+  color:var(--text);
+  padding:12px;
   display:flex;
   justify-content:center;
 }
 
 .app{
-  width: min(820px, 100%);
+  width:min(820px,100%);
   display:flex;
   flex-direction:column;
   gap:12px;
 }
 
 .panel{
-  background: var(--panel);
+  background:var(--panel);
   border:1px solid var(--border);
   border-radius:16px;
   padding:14px;
@@ -52,14 +50,12 @@ body{
   text-align:center;
   font-size:26px;
   font-weight:900;
-  letter-spacing:.2px;
 }
 
 .subturn{
   text-align:center;
   font-size:14px;
-  color: var(--muted);
-  margin-top:6px;
+  color:var(--muted);
 }
 
 .pair{
@@ -67,223 +63,73 @@ body{
   justify-content:center;
   gap:12px;
   flex-wrap:wrap;
-  align-items:center;
   font-weight:900;
   font-size:18px;
 }
 
 .pill{
-  padding: 8px 14px;
+  padding:8px 14px;
   border-radius:999px;
-  background: rgba(255,255,255,.08);
-  border: 1px solid var(--border);
-  min-width: 180px;
+  background:rgba(255,255,255,.08);
+  border:1px solid var(--border);
+  min-width:180px;
   text-align:center;
 }
 
-.vs{ color: rgba(255,255,255,.65); font-weight:900; }
-
 canvas{
-  width: 100%;
-  max-width: 620px;
-  margin: auto;
+  width:100%;
+  max-width:620px;
+  margin:auto;
   display:block;
-  border-radius: 18px;
-  background: rgba(0,0,0,.18);
+  border-radius:18px;
+  background:rgba(0,0,0,.18);
   border:1px solid var(--border);
   touch-action:none;
 }
 
 .controls{
-  text-align:center;
   display:flex;
   justify-content:center;
-  gap:10px;
-  flex-wrap:wrap;
 }
 
 button{
-  padding: 12px 18px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: rgba(0,0,0,.18);
-  color: var(--text);
-  font-weight: 900;
-  cursor: pointer;
+  padding:12px 18px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:rgba(0,0,0,.18);
+  color:var(--text);
+  font-weight:900;
+  cursor:pointer;
 }
 
 button.primary{
-  background: linear-gradient(180deg, #f97316, #fb923c);
-  color: #111;
-  border-color: rgba(249,115,22,.55);
+  background:linear-gradient(180deg,#f97316,#fb923c);
+  color:#111;
 }
 
-button.ghost{
-  background: rgba(255,255,255,.06);
+.sliderWrap{
+  max-width:620px;
+  margin:12px auto 0 auto;
+  padding:10px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:rgba(0,0,0,.14);
 }
 
-.hidden{ display:none; }
+input[type="range"]{
+  width:100%;
+  accent-color:var(--accent);
+}
+
+.hidden{display:none}
 
 .scoreline{
   display:flex;
   justify-content:space-between;
-  align-items:center;
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: rgba(0,0,0,.16);
-  gap:10px;
-}
-
-.scoreLeft{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  min-width: 0;
-}
-.colorDot{
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.18);
-  flex: 0 0 auto;
-}
-.nameText{
-  font-weight:900;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-.scorePts{ font-weight:950; color: rgba(255,255,255,.90); }
-
-.sliderWrap{
-  max-width: 620px;
-  margin: 12px auto 0 auto;
-  padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  background: rgba(0,0,0,.14);
-}
-.sliderTop{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  margin-bottom:8px;
-}
-.badge{
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,.06);
-  font-size: 12px;
-  font-weight: 900;
-  color: rgba(255,255,255,.86);
-}
-input[type="range"]{
-  width:100%;
-  accent-color: var(--accent);
-}
-
-.legend{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-top:10px;
-  font-size:12px;
-  color: rgba(255,255,255,.78);
-}
-.dot{
-  display:inline-block;
-  width:10px;
-  height:10px;
-  border-radius: 999px;
-  margin-right:6px;
-  vertical-align:middle;
-}
-
-.revealNote{
-  max-width: 620px;
-  margin: 10px auto 0 auto;
-  font-size: 12px;
-  color: rgba(255,255,255,.75);
-  text-align:center;
-}
-
-/* ===== Setup modal ===== */
-.overlay{
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.62);
-  backdrop-filter: blur(8px);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding: 14px;
-  z-index: 9999;
-}
-.overlay.show{ display:flex; }
-
-.modal{
-  width: min(760px, 100%);
-  border-radius: 18px;
-  border: 1px solid rgba(255,255,255,.12);
-  background:
-    radial-gradient(900px 520px at 15% 0%, rgba(249,115,22,.10), transparent 55%),
-    radial-gradient(900px 520px at 85% 15%, rgba(59,130,246,.10), transparent 55%),
-    rgba(12,18,34,.94);
-  padding: 16px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-
-.modal h2{ margin:0; font-size:18px; }
-.small{ font-size:12px; color: rgba(255,255,255,.70); }
-
-.row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-
-.field{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  flex:1;
-  min-width: 160px;
-}
-label{ font-size:12px; color: rgba(255,255,255,.78); font-weight:900; }
-
-select, input[type="text"]{
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(0,0,0,.20);
-  color: var(--text);
-  outline:none;
-  font-size: 13px;
-}
-select:focus, input[type="text"]:focus{
-  border-color: rgba(249,115,22,.55);
-  box-shadow: 0 0 0 3px rgba(249,115,22,.12);
-}
-
-.playersList{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  max-height: 48vh;
-  overflow:auto;
-  padding-right:4px;
-}
-
-.playerRow{
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
-.playerRow input{ flex:1; }
-.colorPreview{
-  width: 16px; height:16px; border-radius:999px;
-  border: 1px solid rgba(255,255,255,.18);
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:rgba(0,0,0,.16);
 }
 </style>
 </head>
@@ -293,7 +139,7 @@ select:focus, input[type="text"]:focus{
 
   <div class="panel">
     <div class="turn" id="turnTitle">Wavelength</div>
-    <div class="subturn" id="turnSub">Configure les participants, puis lance une manche.</div>
+    <div class="subturn" id="turnSub"></div>
   </div>
 
   <div class="panel">
@@ -303,622 +149,194 @@ select:focus, input[type="text"]:focus{
   <div class="panel">
     <canvas id="canvas" width="900" height="520"></canvas>
 
-    <!-- Slider (Team only) -->
     <div id="sliderWrap" class="sliderWrap hidden">
-      <div class="sliderTop">
-        <div class="badge">Réglage précis</div>
-        <div class="badge">Valeur : <span id="sliderVal">50</span></div>
-      </div>
-      <input id="needleSlider" type="range" min="0" max="100" step="1" value="50" />
-    </div>
-
-    <!-- Legend (Reveal only) -->
-    <div id="legendWrap" class="legend hidden" style="max-width:620px; margin:10px auto 0 auto;">
-      <span><span class="dot" style="background:var(--green)"></span>Vert ±3% = 4 pts</span>
-      <span><span class="dot" style="background:var(--orange)"></span>Orange ±5% = 2 pts</span>
-      <span><span class="dot" style="background:var(--red)"></span>Rouge ±8% = 1 pt</span>
-    </div>
-    <div id="revealNote" class="revealNote hidden">
-      Barre blanche épaisse = Psychic. Barres fines = joueurs (couleurs choisies).
+      <input id="slider" type="range" min="0" max="100" value="50">
     </div>
   </div>
 
   <div class="panel controls">
-    <button id="btnSetup" class="ghost">Participants</button>
-    <button id="actionBtn" class="primary">Nouvelle partie</button>
+    <button id="actionBtn" class="primary">Nouvelle manche</button>
   </div>
 
-  <div class="panel" id="scoresPanel">
-    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
-      <div style="font-weight:950; font-size:16px;">Scores</div>
-      <button id="btnResetScores" class="ghost">Reset scores</button>
-    </div>
-    <div id="scores" style="margin-top:10px; display:flex; flex-direction:column; gap:8px;"></div>
+  <div class="panel">
+    <h3>Scores</h3>
+    <div id="scores"></div>
   </div>
-</div>
 
-<!-- Setup overlay -->
-<div id="setupOverlay" class="overlay">
-  <div class="modal">
-    <div class="row" style="justify-content:space-between;">
-      <div>
-        <h2>Participants</h2>
-        <div class="small">Choisis les pseudos et une couleur. Le Psychic est tiré au sort au démarrage.</div>
-      </div>
-      <button id="btnCloseSetup" class="ghost">Fermer</button>
-    </div>
-
-    <div class="row">
-      <div class="field">
-        <label>Nombre de participants</label>
-        <select id="playerCount">
-          <option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Palette</label>
-        <div class="small">Couleurs visibles au reveal (barres joueurs).</div>
-      </div>
-    </div>
-
-    <div id="playersList" class="playersList"></div>
-
-    <div class="row" style="justify-content:flex-end;">
-      <button id="btnRandomPsychic" class="ghost">Psychic aléatoire</button>
-      <button id="btnStart" class="primary">Démarrer</button>
-    </div>
-  </div>
 </div>
 
 <script>
-/* ===================== THEMES ===================== */
+/* ===== THEMES ===== */
 const PAIRS = [
-  ["Rappeur inconnu","Rappeur légendaire"],
-  ["Acteur éclaté","Acteur immense"],
-  ["Jeu vidéo niche","Jeu vidéo mythique"],
-  ["Punchline faible","Punchline assassine"],
-  ["Ville éclatée","Ville incroyable"],
-  ["Film chiant","Film addictif"],
   ["Humour gênant","Humour masterclass"],
-  ["Feat inutile","Feat qui détruit le track"],
-  ["Série oubliable","Série culte"],
+  ["Rappeur inconnu","Rappeur légendaire"],
+  ["Jeu vidéo nul","Jeu vidéo culte"],
+  ["Film éclaté","Film incroyable"]
 ];
 
-/* ===================== COLORS ===================== */
-const COLOR_CHOICES = [
-  {label:"Bleu",   value:"#60a5fa"},
-  {label:"Violet", value:"#a78bfa"},
-  {label:"Rose",   value:"#fb7185"},
-  {label:"Rouge",  value:"#f87171"},
-  {label:"Orange", value:"#fb923c"},
-  {label:"Jaune",  value:"#facc15"},
-  {label:"Vert",   value:"#4ade80"},
-  {label:"Turquoise", value:"#2dd4bf"},
+/* ===== STATE ===== */
+let players = [
+  {id:1,name:"Alice",color:"#60a5fa",score:0},
+  {id:2,name:"Bob",color:"#f87171",score:0},
+  {id:3,name:"Charly",color:"#4ade80",score:0}
 ];
-
-/* ===================== SCORING ZONES (TES REGLES) ===================== */
-const Z_GREEN = 3;   // ±3 -> 4 pts
-const Z_ORANGE = 5;  // ±5 -> 2 pts
-const Z_RED = 8;     // ±8 -> 1 pt
-
-function pointsForGuess(secret, guess){
-  const d = Math.abs(guess - secret);
-  if(d <= Z_GREEN) return 4;
-  if(d <= Z_ORANGE) return 2;
-  if(d <= Z_RED) return 1;
-  return 0;
-}
-
-/* ===================== STATE ===================== */
-const STORAGE_KEY = "wl_mobile_players_v2";
-
-let players = []; // {id,name,color,score}
 let psychicIndex = 0;
-
-let phase = "setup"; // setup | psychic | team | reveal
-let roundPair = null;
-
-let secret = 0;
-let guesses = {};   // by playerId: { [id]: value }
+let phase = "psychic";
+let secret = Math.floor(Math.random()*101);
+let guesses = {};
 let currentNeedle = 50;
-let roundScored = false; // important: incrémenter points une seule fois
+let roundScored = false;
+let roundPair = PAIRS[Math.floor(Math.random()*PAIRS.length)];
 
-/* ===================== DOM ===================== */
+/* ===== DOM ===== */
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-
-const turnTitle = document.getElementById("turnTitle");
-const turnSub   = document.getElementById("turnSub");
-const pairDiv   = document.getElementById("pair");
-
-const btnSetup  = document.getElementById("btnSetup");
-const btn       = document.getElementById("actionBtn");
-
+const slider = document.getElementById("slider");
 const sliderWrap = document.getElementById("sliderWrap");
-const needleSlider = document.getElementById("needleSlider");
-const sliderVal = document.getElementById("sliderVal");
-
-const legendWrap = document.getElementById("legendWrap");
-const revealNote = document.getElementById("revealNote");
-
+const btn = document.getElementById("actionBtn");
+const pairDiv = document.getElementById("pair");
 const scoresDiv = document.getElementById("scores");
-const btnResetScores = document.getElementById("btnResetScores");
+const turnTitle = document.getElementById("turnTitle");
+const turnSub = document.getElementById("turnSub");
 
-/* Setup overlay */
-const setupOverlay = document.getElementById("setupOverlay");
-const btnCloseSetup = document.getElementById("btnCloseSetup");
-const playerCount = document.getElementById("playerCount");
-const playersList = document.getElementById("playersList");
-const btnRandomPsychic = document.getElementById("btnRandomPsychic");
-const btnStart = document.getElementById("btnStart");
+/* ===== UTILS ===== */
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const angleFromPct=p=>Math.PI-(p/100)*Math.PI;
 
-/* ===================== UTILS ===================== */
-const rand = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
-const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
-const uid = ()=>"p_"+Math.random().toString(36).slice(2,10);
-
-function savePlayers(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({players, psychicIndex}));
-}
-function loadPlayers(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw) return false;
-    const data = JSON.parse(raw);
-    if(Array.isArray(data.players) && data.players.length>=2){
-      players = data.players.map(p=>({
-        id: p.id || uid(),
-        name: (p.name||"Joueur").slice(0,14),
-        color: p.color || COLOR_CHOICES[0].value,
-        score: Number(p.score||0)
-      }));
-      psychicIndex = Number.isInteger(data.psychicIndex) ? data.psychicIndex : 0;
-      psychicIndex = clamp(psychicIndex, 0, players.length-1);
-      return true;
-    }
-  }catch(e){}
-  return false;
+/* ===== DRAW ===== */
+function drawZone(delta,color,cx,cy,r){
+  const a1=angleFromPct(clamp(secret-delta,0,100));
+  const a2=angleFromPct(clamp(secret+delta,0,100));
+  ctx.strokeStyle=color;
+  ctx.lineWidth=44;
+  ctx.lineCap="butt";
+  ctx.beginPath();
+  ctx.arc(cx,cy,r,a1,a2,false);
+  ctx.stroke();
 }
 
-function pickPairOnce(){
-  roundPair = PAIRS[rand(0, PAIRS.length-1)];
-}
-function renderPair(){
-  if(!roundPair){
-    pairDiv.innerHTML = `<span class="pill">—</span><span class="vs">↔</span><span class="pill">—</span>`;
-    return;
-  }
-  const [L,R] = roundPair;
-  pairDiv.innerHTML = `
-    <span class="pill">${L}</span>
-    <span class="vs">↔</span>
-    <span class="pill">${R}</span>
-  `;
+function drawNeedle(pct,color,width,cx,cy,r){
+  const a=angleFromPct(pct);
+  ctx.strokeStyle=color;
+  ctx.lineWidth=width;
+  ctx.beginPath();
+  ctx.moveTo(cx,cy);
+  ctx.lineTo(cx+Math.cos(a)*r, cy-Math.sin(a)*r);
+  ctx.stroke();
 }
 
-/* ===================== DRAW ===================== */
-function pctToAngle(pct){ return Math.PI*(1 - pct/100); }
+function draw(mode){
+  ctx.clearRect(0,0,900,520);
+  const cx=450,cy=460,r=320;
 
-function drawBaseArc(cx,cy,r){
-  ctx.save();
   ctx.strokeStyle="rgba(255,255,255,.18)";
   ctx.lineWidth=60;
-  ctx.lineCap="round";
   ctx.beginPath();
   ctx.arc(cx,cy,r,Math.PI,0,false);
   ctx.stroke();
-  ctx.restore();
-}
 
-function drawZone(radiusPct, color, cx,cy,r){
-  const left = clamp(secret - radiusPct, 0, 100);
-  const right = clamp(secret + radiusPct, 0, 100);
-  const aLeft = pctToAngle(left);
-  const aRight = pctToAngle(right);
-
-  // IMPORTANT: cap "butt" pour éviter les blobs arrondis (bug que tu vois)
-  ctx.save();
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 44;
-  ctx.lineCap = "butt";
-  ctx.beginPath();
-  ctx.arc(cx,cy,r, aRight, aLeft, false);
-  ctx.stroke();
-  ctx.restore();
-}
-
-function drawNeedle(pct, color, width, cx,cy,r){
-  const a = pctToAngle(pct);
-  const nx = cx + Math.cos(a)*r;
-  const ny = cy - Math.sin(a)*r;
-
-  ctx.save();
-  ctx.strokeStyle = color;
-  ctx.lineWidth = width;
-  ctx.lineCap="round";
-  ctx.beginPath();
-  ctx.moveTo(cx,cy);
-  ctx.lineTo(nx,ny);
-  ctx.stroke();
-  ctx.restore();
-}
-
-function drawDial({mode}){
-  // mode: "psychic" | "team" | "reveal"
-  ctx.clearRect(0,0,900,520);
-  const cx=450, cy=460, r=320;
-
-  drawBaseArc(cx,cy,r);
-
-  if(mode === "reveal"){
-    // zones (du plus large au plus précis, pour lisibilité)
-    drawZone(Z_RED,   "rgba(239,68,68,.30)", cx,cy,r);
-    drawZone(Z_ORANGE,"rgba(245,158,11,.32)", cx,cy,r);
-    drawZone(Z_GREEN, "rgba(34,197,94,.38)", cx,cy,r);
+  if(mode==="reveal"){
+    drawZone(8,"rgba(239,68,68,.35)",cx,cy,r);
+    drawZone(5,"rgba(245,158,11,.40)",cx,cy,r);
+    drawZone(3,"rgba(34,197,94,.45)",cx,cy,r);
   }
 
-  // Center hub
-  ctx.save();
-  ctx.fillStyle="rgba(255,255,255,.90)";
-  ctx.beginPath();
-  ctx.arc(cx,cy,12,0,Math.PI*2);
-  ctx.fill();
-  ctx.restore();
-
-  if(mode === "psychic"){
-    // Psychic voit l’aiguille sur le secret (fine) + marker orange
-    drawNeedle(secret, "rgba(255,255,255,.90)", 6, cx,cy,r);
-
-    // petit point secret
-    const as = pctToAngle(secret);
-    ctx.save();
-    ctx.fillStyle = "#f97316";
-    ctx.beginPath();
-    ctx.arc(cx+Math.cos(as)*r, cy-Math.sin(as)*r, 8, 0, Math.PI*2);
-    ctx.fill();
-    ctx.restore();
+  if(mode==="psychic"){
+    drawNeedle(secret,"white",6,cx,cy,r);
   }
 
-  if(mode === "team"){
-    drawNeedle(currentNeedle, "rgba(255,255,255,.92)", 6, cx,cy,r);
-
-    // affichage valeur en haut
-    ctx.save();
-    ctx.fillStyle="rgba(255,255,255,.88)";
-    ctx.font="900 32px Arial";
-    ctx.textAlign="center";
-    ctx.fillText(String(currentNeedle), cx, 70);
-    ctx.font="700 14px Arial";
-    ctx.fillStyle="rgba(255,255,255,.60)";
-    ctx.fillText("Ton placement", cx, 95);
-    ctx.restore();
+  if(mode==="team"){
+    drawNeedle(currentNeedle,"white",6,cx,cy,r);
   }
 
-  if(mode === "reveal"){
-    // secret = barre blanche épaisse
-    drawNeedle(secret, "rgba(255,255,255,.95)", 11, cx,cy,r);
-
-    // guesses = barres fines colorées
-    for(const p of players){
-      if(p.id === players[psychicIndex].id) continue;
-      const g = guesses[p.id];
-      if(g == null) continue;
-      drawNeedle(g, p.color, 5, cx,cy,r);
-    }
-
-    // repère secret (petit point orange)
-    const as = pctToAngle(secret);
-    ctx.save();
-    ctx.fillStyle = "#f97316";
-    ctx.beginPath();
-    ctx.arc(cx+Math.cos(as)*r, cy-Math.sin(as)*r, 7, 0, Math.PI*2);
-    ctx.fill();
-    ctx.restore();
+  if(mode==="reveal"){
+    drawNeedle(secret,"white",12,cx,cy,r);
+    players.forEach(p=>{
+      if(p.id===players[psychicIndex].id) return;
+      if(guesses[p.id]!=null){
+        drawNeedle(guesses[p.id],p.color,5,cx,cy,r);
+      }
+    });
   }
 }
 
-/* ===================== GAME FLOW ===================== */
-function nextRound(){
-  guesses = {};
-  secret = rand(0,100);
-  currentNeedle = 50;
-  roundScored = false;
-  pickPairOnce();
-  phase = "psychic";
-  updateUI();
-}
-
-function getNextTeamPlayer(){
-  const psychicId = players[psychicIndex]?.id;
-  for(const p of players){
-    if(p.id === psychicId) continue;
-    if(guesses[p.id] == null) return p;
-  }
-  return null;
-}
-
-/* ===================== UI ===================== */
-function syncSlider(){
-  needleSlider.value = String(currentNeedle);
-  sliderVal.textContent = String(currentNeedle);
+/* ===== SCORE ===== */
+function points(g){
+  const d=Math.abs(g-secret);
+  if(d<=3) return 4;
+  if(d<=5) return 2;
+  if(d<=8) return 1;
+  return 0;
 }
 
 function renderScores(){
-  scoresDiv.innerHTML = "";
-  const psychicId = players[psychicIndex]?.id;
-
-  players.forEach(p=>{
-    const line = document.createElement("div");
-    line.className = "scoreline";
-    line.innerHTML = `
-      <div class="scoreLeft">
-        <span class="colorDot" style="background:${p.color}"></span>
-        <span class="nameText">${p.name}${p.id===psychicId ? " (Psychic)" : ""}</span>
-      </div>
-      <div class="scorePts">${p.score} pts</div>
-    `;
-    scoresDiv.appendChild(line);
+  scoresDiv.innerHTML="";
+  players.forEach((p,i)=>{
+    scoresDiv.innerHTML+=`
+      <div class="scoreline">
+        <span>${p.name}${i===psychicIndex?" (Psychic)":""}</span>
+        <b>${p.score} pts</b>
+      </div>`;
   });
 }
 
-function updateUI(){
-  renderPair();
+/* ===== FLOW ===== */
+function update(){
+  pairDiv.innerHTML=`<span class="pill">${roundPair[0]}</span><span class="pill">${roundPair[1]}</span>`;
   renderScores();
-  savePlayers();
 
-  // Affichages conditionnels
-  sliderWrap.classList.toggle("hidden", phase !== "team");
-  legendWrap.classList.toggle("hidden", phase !== "reveal");
-  revealNote.classList.toggle("hidden", phase !== "reveal");
+  if(phase==="psychic"){
+    turnTitle.textContent="TOUR DU PSYCHIC";
+    turnSub.textContent=`Secret : ${secret}`;
+    sliderWrap.classList.add("hidden");
+    draw("psychic");
+    btn.textContent="Passer à l'équipe";
+    btn.onclick=()=>{ phase="team"; update(); };
+  }
 
-  if(phase === "setup"){
-    turnTitle.textContent = "Wavelength";
-    turnSub.textContent = "Configure les participants puis démarre.";
-    drawDial({mode:"team"}); // neutre
-    btn.textContent = players.length ? "Démarrer une manche" : "Nouvelle partie";
-    btn.onclick = ()=>{
-      if(players.length < 2){
-        openSetup();
-        return;
+  if(phase==="team"){
+    sliderWrap.classList.remove("hidden");
+    draw("team");
+    btn.textContent="Valider";
+    btn.onclick=()=>{
+      const next=players.find(p=>p.id!==players[psychicIndex].id && guesses[p.id]==null);
+      if(next){ guesses[next.id]=currentNeedle; }
+      if(Object.keys(guesses).length===players.length-1){
+        phase="reveal";
       }
-      // Psychic aléatoire au tout début si première manche
-      if(!roundPair){
-        psychicIndex = rand(0, players.length-1);
-      }
-      nextRound();
+      update();
     };
-    return;
   }
 
-  if(phase === "psychic"){
-    const psychic = players[psychicIndex];
-    turnTitle.textContent = "TOUR DU PSYCHIC";
-    turnSub.textContent = `${psychic.name} — Secret: ${secret} (à ne pas dire)`;
-    drawDial({mode:"psychic"});
-    btn.textContent = "Passer à l'équipe";
-    btn.onclick = ()=>{
-      phase = "team";
-      currentNeedle = 50;
-      syncSlider();
-      updateUI();
-    };
-    return;
-  }
-
-  if(phase === "team"){
-    const nextP = getNextTeamPlayer();
-    if(!nextP){
-      phase = "reveal";
-      updateUI();
-      return;
-    }
-    turnTitle.textContent = "TOUR DE L'ÉQUIPE";
-    turnSub.textContent = `${nextP.name} — place ton aiguille puis valide`;
-    syncSlider();
-    drawDial({mode:"team"});
-    btn.textContent = "Valider mon placement";
-    btn.onclick = ()=>{
-      guesses[nextP.id] = currentNeedle;
-      currentNeedle = 50;
-      syncSlider();
-      updateUI();
-    };
-    return;
-  }
-
-  if(phase === "reveal"){
-    // incrémenter les points UNE seule fois par manche
+  if(phase==="reveal"){
+    sliderWrap.classList.add("hidden");
+    draw("reveal");
     if(!roundScored){
-      const psychicId = players[psychicIndex]?.id;
-      for(const p of players){
-        if(p.id === psychicId) continue;
-        const g = guesses[p.id];
-        if(g == null) continue;
-        p.score += pointsForGuess(secret, g);
-      }
-      roundScored = true;
-      renderScores();
-      savePlayers();
+      players.forEach(p=>{
+        if(p.id!==players[psychicIndex].id){
+          p.score+=points(guesses[p.id]);
+        }
+      });
+      roundScored=true;
     }
-
-    turnTitle.textContent = "RÉVÉLATION";
-    turnSub.textContent = `Barème autour du secret : vert(4) / orange(2) / rouge(1)`;
-    drawDial({mode:"reveal"});
-
-    btn.textContent = "Manche suivante (Psychic suivant)";
-    btn.onclick = ()=>{
-      // Psychic suivant (rotation)
-      psychicIndex = (psychicIndex + 1) % players.length;
-      nextRound();
+    btn.textContent="Nouvelle manche";
+    btn.onclick=()=>{
+      psychicIndex=(psychicIndex+1)%players.length;
+      secret=Math.floor(Math.random()*101);
+      guesses={};
+      roundScored=false;
+      phase="psychic";
+      update();
     };
-    return;
   }
 }
 
-/* ===================== TEAM INPUTS: CANVAS DRAG + SLIDER ===================== */
-function pointerToPct(ev){
-  const rect = canvas.getBoundingClientRect();
-  const x = clamp((ev.clientX - rect.left) / rect.width, 0, 1);
-  return Math.round(x * 100);
-}
-
-let dragging = false;
-
-canvas.addEventListener("pointerdown", (e)=>{
-  if(phase !== "team") return;
-  dragging = true;
-  canvas.setPointerCapture(e.pointerId);
-  currentNeedle = pointerToPct(e);
-  syncSlider();
-  drawDial({mode:"team"});
-});
-
-canvas.addEventListener("pointermove", (e)=>{
-  if(!dragging) return;
-  if(phase !== "team") return;
-  currentNeedle = pointerToPct(e);
-  syncSlider();
-  drawDial({mode:"team"});
-});
-
-canvas.addEventListener("pointerup", ()=> dragging=false);
-canvas.addEventListener("pointercancel", ()=> dragging=false);
-
-needleSlider.addEventListener("input", ()=>{
-  if(phase !== "team") return;
-  currentNeedle = Number(needleSlider.value);
-  sliderVal.textContent = String(currentNeedle);
-  drawDial({mode:"team"});
-});
-
-/* ===================== SETUP MODAL ===================== */
-function openSetup(){
-  setupOverlay.classList.add("show");
-  hydrateSetupUI();
-}
-function closeSetup(){
-  setupOverlay.classList.remove("show");
-}
-
-btnSetup.onclick = openSetup;
-btnCloseSetup.onclick = closeSetup;
-
-function ensurePlayersCount(n){
-  const prev = [...players];
-  players = [];
-  for(let i=0;i<n;i++){
-    const old = prev[i];
-    players.push({
-      id: old?.id || uid(),
-      name: (old?.name || `Joueur ${i+1}`).slice(0,14),
-      color: old?.color || COLOR_CHOICES[i % COLOR_CHOICES.length].value,
-      score: Number(old?.score || 0)
-    });
-  }
-  psychicIndex = clamp(psychicIndex, 0, players.length-1);
-}
-
-function hydrateSetupUI(){
-  const n = players.length >= 2 ? players.length : Number(playerCount.value || 3);
-  playerCount.value = String(n);
-  ensurePlayersCount(n);
-
-  playersList.innerHTML = "";
-  players.forEach((p, idx)=>{
-    const row = document.createElement("div");
-    row.className = "playerRow";
-
-    const input = document.createElement("input");
-    input.type = "text";
-    input.maxLength = 14;
-    input.value = p.name;
-    input.dataset.pid = p.id;
-
-    const preview = document.createElement("div");
-    preview.className = "colorPreview";
-    preview.style.background = p.color;
-
-    const select = document.createElement("select");
-    select.dataset.pid = p.id;
-    COLOR_CHOICES.forEach(c=>{
-      const opt = document.createElement("option");
-      opt.value = c.value;
-      opt.textContent = c.label;
-      if(c.value === p.color) opt.selected = true;
-      select.appendChild(opt);
-    });
-
-    select.addEventListener("change", ()=>{
-      p.color = select.value;
-      preview.style.background = p.color;
-    });
-
-    row.appendChild(input);
-    row.appendChild(preview);
-    row.appendChild(select);
-    playersList.appendChild(row);
-  });
-}
-
-playerCount.addEventListener("change", hydrateSetupUI);
-
-btnRandomPsychic.onclick = ()=>{
-  if(players.length < 2) return;
-  psychicIndex = rand(0, players.length-1);
-  // juste une info dans l’UI principale
-  turnSub.textContent = `Psychic aléatoire prêt : ${players[psychicIndex].name}.`;
+slider.oninput=e=>{
+  currentNeedle=Number(e.target.value);
+  draw("team");
 };
 
-btnStart.onclick = ()=>{
-  // lire inputs + selects
-  const inputs = playersList.querySelectorAll('input[data-pid]');
-  inputs.forEach(inp=>{
-    const p = players.find(x=>x.id === inp.dataset.pid);
-    if(!p) return;
-    const v = (inp.value || "").trim();
-    if(v.length) p.name = v.slice(0,14);
-  });
-
-  const selects = playersList.querySelectorAll('select[data-pid]');
-  selects.forEach(sel=>{
-    const p = players.find(x=>x.id === sel.dataset.pid);
-    if(!p) return;
-    p.color = sel.value;
-  });
-
-  // Psychic aléatoire au démarrage de partie (si on repart de zéro)
-  if(!roundPair){
-    psychicIndex = rand(0, players.length-1);
-  }
-
-  savePlayers();
-  closeSetup();
-  phase = "setup";
-  updateUI();
-};
-
-/* ===================== RESET SCORES ===================== */
-btnResetScores.onclick = ()=>{
-  players.forEach(p=>p.score = 0);
-  savePlayers();
-  renderScores();
-};
-
-/* ===================== INIT ===================== */
-if(!loadPlayers()){
-  players = [
-    {id:uid(), name:"Joueur 1", color: COLOR_CHOICES[0].value, score:0},
-    {id:uid(), name:"Joueur 2", color: COLOR_CHOICES[1].value, score:0},
-    {id:uid(), name:"Joueur 3", color: COLOR_CHOICES[2].value, score:0},
-  ];
-  psychicIndex = 0;
-  savePlayers();
-}
-
-phase = "setup";
-roundPair = null;
-updateUI();
+update();
 </script>
-
 </body>
 </html>
