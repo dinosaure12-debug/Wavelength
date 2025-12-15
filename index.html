@@ -506,16 +506,16 @@ function pctToAngle(pct){
 
 function bandColorForPct(pct){
   const d = Math.abs(pct - secret);
-  if (d <= Z_GREEN)  return "rgba(34,197,94,.80)";   // vert
-  if (d <= Z_ORANGE) return "rgba(245,158,11,.80)";  // orange
-  if (d <= Z_RED)    return "rgba(239,68,68,.80)";   // rouge
+  if (d <= Z_GREEN)  return "rgba(34,197,94,.85)";   // vert
+  if (d <= Z_ORANGE) return "rgba(245,158,11,.85)";  // orange
+  if (d <= Z_RED)    return "rgba(239,68,68,.85)";   // rouge
   return null;
 }
 
 function drawScoringBandsSampled(cx, cy, r){
-  const ringR = r - 20;     // anneau intérieur
-  const lw = 20;            // épaisseur des bandes
-  const step = 0.25;        // précision
+  const ringR = r - 20;   // rayon des bandes (anneau)
+  const lw = 20;          // épaisseur
+  const step = 0.25;      // finesse (0.25 ou 0.5)
 
   const startPct = clamp(secret - Z_RED, 0, 100);
   const endPct   = clamp(secret + Z_RED, 0, 100);
@@ -523,21 +523,47 @@ function drawScoringBandsSampled(cx, cy, r){
   ctx.save();
   ctx.lineWidth = lw;
   ctx.lineCap = "butt";
+  ctx.lineJoin = "round";
 
-  for(let p = startPct; p < endPct; p += step){
-    const p2 = Math.min(p + step, endPct);
-    const col = bandColorForPct((p + p2) / 2);
-    if(!col) continue;
+  let currentColor = null;
+  let hasPath = false;
 
-    const a1 = pctToAngle(p);
-    const a2 = pctToAngle(p2);
+  for(let p = startPct; p <= endPct; p += step){
+    const col = bandColorForPct(p);
+    const a = pctToAngle(p);
+    const x = cx + Math.cos(a) * ringR;
+    const y = cy - Math.sin(a) * ringR;
 
-    ctx.strokeStyle = col;
-    ctx.beginPath();
-    ctx.arc(cx, cy, ringR, a1, a2, false);
-    ctx.stroke();
+    // Si on change de couleur, on "flush" le trait précédent
+    if(col !== currentColor){
+      if(hasPath){
+        ctx.stroke();
+        hasPath = false;
+      }
+      currentColor = col;
+      if(currentColor){
+        ctx.strokeStyle = currentColor;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        hasPath = true;
+      }
+      continue;
+    }
+
+    // Même couleur => on continue la polyligne
+    if(currentColor){
+      if(!hasPath){
+        ctx.strokeStyle = currentColor;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        hasPath = true;
+      } else {
+        ctx.lineTo(x, y);
+      }
+    }
   }
 
+  if(hasPath) ctx.stroke();
   ctx.restore();
 }
 
