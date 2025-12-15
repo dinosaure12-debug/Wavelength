@@ -397,9 +397,9 @@ const COLOR_CHOICES = [
 ];
 
 /* ===================== SCORING ZONES (TES REGLES) ===================== */
-const Z_GREEN = 5;   // ±3 -> 4 pts
-const Z_ORANGE = 7;  // ±5 -> 2 pts
-const Z_RED = 11;     // ±8 -> 1 pt
+const Z_GREEN = 4;   //
+const Z_ORANGE = 7;  //
+const Z_RED = 11;     // 
 
 function pointsForGuess(secret, guess){
   const d = Math.abs(guess - secret);
@@ -512,7 +512,7 @@ function bandColorForPct(pct){
 
 function drawScoringBandsSampled(cx, cy, r){
   const ringR = r - 20;   // rayon des bandes (anneau)
-  const lw = 20;          // épaisseur
+  const lw = 40;          // épaisseur
   const step = 0.25;      // finesse (0.25 ou 0.5)
 
   const startPct = clamp(secret - Z_RED, 0, 100);
