@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Wavelength – Mobile (Solo local)</title>
+  <title>Wavelength – Mobile</title>
   <style>
     :root{
-      --bg:#0b1220;
+      --bg:#070b14;
       --panel:rgba(255,255,255,.06);
       --border:rgba(255,255,255,.12);
       --text:#f9fafb;
@@ -14,6 +14,7 @@
       --accent:#f97316;
       --good:#22c55e;
       --warn:#fbbf24;
+      --shadow: 0 18px 55px rgba(0,0,0,.45);
     }
     *{box-sizing:border-box}
     body{
@@ -21,15 +22,16 @@
       font-family: Arial, sans-serif;
       color:var(--text);
       background:
-        radial-gradient(900px 550px at 20% 0%, rgba(249,115,22,.10), transparent 55%),
-        radial-gradient(900px 550px at 80% 15%, rgba(59,130,246,.10), transparent 55%),
+        radial-gradient(900px 550px at 15% 0%, rgba(249,115,22,.12), transparent 55%),
+        radial-gradient(900px 550px at 85% 15%, rgba(59,130,246,.12), transparent 55%),
+        radial-gradient(900px 550px at 50% 100%, rgba(34,197,94,.08), transparent 60%),
         var(--bg);
       padding: 12px;
       display:flex;
       justify-content:center;
     }
     .app{
-      width: min(720px, 100%);
+      width: min(760px, 100%);
       display:flex;
       flex-direction:column;
       gap:12px;
@@ -39,134 +41,138 @@
       background: var(--panel);
       border-radius:16px;
       padding:14px;
-      backdrop-filter: blur(6px);
-      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+      backdrop-filter: blur(8px);
+      box-shadow: var(--shadow);
     }
-    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
-    h1{ margin:0; font-size:18px; }
+    .top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    h1{ margin:0; font-size:18px; letter-spacing:.2px; }
     .muted{ color:var(--muted); font-size:12px; line-height:1.35; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+
     .btn{
       padding:10px 14px;
       border-radius:999px;
       border:1px solid var(--border);
       background: rgba(0,0,0,.18);
       color:var(--text);
-      font-weight:800;
+      font-weight:900;
       cursor:pointer;
       user-select:none;
-      transition: transform .08s ease, border-color .12s ease;
+      transition: transform .08s ease, border-color .12s ease, box-shadow .12s ease, filter .12s ease;
     }
-    .btn:hover{ transform: translateY(-1px); border-color: rgba(249,115,22,.45); }
+    .btn:hover{ transform: translateY(-1px); border-color: rgba(249,115,22,.50); }
     .btn:active{ transform: translateY(0); }
     .btn-primary{
-      background: linear-gradient(180deg, rgba(249,115,22,.95), rgba(249,115,22,.80));
+      background: linear-gradient(180deg, rgba(249,115,22,.95), rgba(249,115,22,.82));
       border-color: rgba(249,115,22,.85);
       color:#0b1220;
       box-shadow: 0 10px 22px rgba(249,115,22,.18);
     }
-    .btn-ghost{ background: rgba(0,0,0,.10); }
-    .bigPair{
-      font-weight:900;
-      font-size:18px;
-      text-align:center;
-      padding: 10px 8px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.14);
+    .btn-green{
+      background: rgba(34,197,94,.16);
+      border-color: rgba(34,197,94,.35);
     }
-    .bigPair span{
-      display:inline-block;
-      min-width: 110px;
+    .btn-ghost{
+      background: rgba(0,0,0,.10);
     }
 
-    /* Target */
-    .targetWrap{
+    .pairCard{
       display:flex;
       flex-direction:column;
       gap:10px;
+      text-align:center;
+      padding: 14px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
     }
-    .bar{
-      position:relative;
-      height: 62px;
+    .pair{
+      font-weight:950;
+      font-size:18px;
+      line-height:1.2;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .pill{
+      padding: 8px 12px;
       border-radius: 999px;
       border:1px solid rgba(255,255,255,.12);
-      background:
-        linear-gradient(90deg, rgba(59,130,246,.14), rgba(249,115,22,.14));
-      overflow:hidden;
-      touch-action:none;
+      background: rgba(255,255,255,.06);
+      min-width: 150px;
+    }
+    .vs{
+      color: rgba(255,255,255,.78);
+      font-weight:900;
     }
 
-    .tick{
-      position:absolute;
-      top: 8px;
-      bottom: 8px;
-      width: 1px;
-      background: rgba(255,255,255,.12);
-    }
-    .zone{
-      position:absolute;
-      top: 10px;
-      bottom: 10px;
-      border-radius: 999px;
-      background: rgba(34,197,94,.10);
-      border: 1px solid rgba(34,197,94,.18);
-      display:none;
-    }
+    .screen{ display:none; }
+    .screen.show{ display:block; }
 
-    .needle{
-      position:absolute;
-      top: -6px;
-      bottom: -6px;
-      width: 4px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.90);
-      box-shadow: 0 10px 24px rgba(0,0,0,.45);
-      transform: translateX(-2px);
+    .canvasWrap{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:center;
     }
-    .needle::after{
-      content:"";
-      position:absolute;
-      top:-6px;
-      left:50%;
-      transform: translateX(-50%);
-      width: 14px;
-      height: 14px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.90);
+    canvas{
+      width: 100%;
+      max-width: 560px;
+      height: auto;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.14);
+      box-shadow: 0 16px 40px rgba(0,0,0,.35);
+      touch-action: none;
     }
-
-    .labelRow{
+    .labels{
+      width: min(560px, 100%);
       display:flex;
       justify-content:space-between;
       font-size:12px;
       color: rgba(255,255,255,.82);
       margin-top:-2px;
+      padding: 0 6px;
     }
 
-    /* Screens */
-    .screen{ display:none; }
-    .screen.show{ display:block; }
-    .secret{
-      padding:10px 12px;
-      border-radius:14px;
+    .secretBox{
+      width:100%;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:space-between;
+      align-items:center;
+      padding: 12px;
+      border-radius:16px;
       border:1px solid rgba(255,255,255,.10);
       background: rgba(0,0,0,.16);
-      display:flex;
-      flex-direction:column;
-      gap:8px;
     }
-    .secret .value{
-      font-size:28px;
-      font-weight:950;
-      letter-spacing:.2px;
+    .bigNum{ font-size:28px; font-weight:950; letter-spacing:.2px; }
+    .badge{
+      padding: 6px 10px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      font-size:12px;
+      color: rgba(255,255,255,.86);
+      font-weight:900;
+      white-space:nowrap;
     }
     .scoreBox{
       display:flex;
       justify-content:space-between;
       align-items:center;
-      gap:10px;
-      padding: 10px 12px;
-      border-radius:14px;
+      gap:12px;
+      padding: 12px;
+      border-radius:16px;
       border:1px solid rgba(255,255,255,.10);
       background: rgba(0,0,0,.16);
     }
@@ -179,11 +185,10 @@
 
 <body>
   <div class="app">
-
     <div class="panel">
-      <div class="row">
+      <div class="top">
         <h1>Wavelength – Mobile</h1>
-        <div class="row" style="gap:8px; justify-content:flex-end;">
+        <div class="row">
           <button id="btn-new" class="btn btn-ghost">Nouvelle manche</button>
           <button id="btn-switch" class="btn btn-primary">Passer au Psychic</button>
         </div>
@@ -191,48 +196,52 @@
       <div class="muted" id="subtitle"></div>
     </div>
 
-    <div class="panel">
-      <div class="bigPair" id="pair">Chargement…</div>
+    <div class="panel pairCard">
+      <div class="pair" id="pair">
+        <span class="pill">…</span>
+        <span class="vs">↔</span>
+        <span class="pill">…</span>
+      </div>
+      <div class="muted" id="pairHint"></div>
     </div>
 
-    <!-- Psychic screen -->
+    <!-- Psychic -->
     <div class="panel screen" id="screen-psychic">
-      <div class="row">
-        <div style="font-weight:900;">Écran Psychic (secret)</div>
-        <div class="muted">Donne un indice. Puis passe le téléphone.</div>
+      <div class="row" style="justify-content:space-between;">
+        <div class="badge">Écran Psychic (secret)</div>
+        <div class="muted">Donne un indice, puis passe le téléphone.</div>
       </div>
 
-      <div class="secret">
-        <div class="muted">Position cible (0–100)</div>
-        <div class="value" id="secretValue">—</div>
-        <div class="muted">La zone de score est calculée automatiquement autour du secret.</div>
-      </div>
-
-      <div class="targetWrap" style="margin-top:12px;">
-        <div class="bar" id="barPsychic">
-          <!-- ticks -->
+      <div class="secretBox" style="margin-top:12px;">
+        <div>
+          <div class="muted">Position secrète</div>
+          <div class="bigNum" id="secretValue">—</div>
         </div>
-        <div class="labelRow">
+        <div class="row">
+          <span class="badge" id="zoneInfo">Zone: —</span>
+          <span class="badge">0 ⇢ 100</span>
+        </div>
+      </div>
+
+      <div class="canvasWrap" style="margin-top:12px;">
+        <canvas id="canvasPsychic" width="900" height="520"></canvas>
+        <div class="labels">
           <div id="leftLabelP">Gauche</div>
           <div id="rightLabelP">Droite</div>
         </div>
       </div>
-
-      <div class="muted" style="margin-top:10px;">
-        Astuce : plus tu es proche du centre de la zone, plus tu marques de points.
-      </div>
     </div>
 
-    <!-- Team screen -->
+    <!-- Team -->
     <div class="panel screen" id="screen-team">
-      <div class="row">
-        <div style="font-weight:900;">Écran Équipe</div>
-        <div class="muted">Placez le curseur selon l’indice.</div>
+      <div class="row" style="justify-content:space-between;">
+        <div class="badge">Écran Équipe</div>
+        <div class="muted">Glissez pour placer l’aiguille.</div>
       </div>
 
-      <div class="targetWrap" style="margin-top:12px;">
-        <div class="bar" id="barTeam"></div>
-        <div class="labelRow">
+      <div class="canvasWrap" style="margin-top:12px;">
+        <canvas id="canvasTeam" width="900" height="520"></canvas>
+        <div class="labels">
           <div id="leftLabelT">Gauche</div>
           <div id="rightLabelT">Droite</div>
         </div>
@@ -240,244 +249,361 @@
 
       <div class="row" style="margin-top:12px;">
         <button id="btn-reveal" class="btn btn-green">Révéler & scorer</button>
-        <button id="btn-hide" class="btn btn-ghost">Cacher la zone</button>
+        <button id="btn-hide" class="btn btn-ghost">Cacher</button>
       </div>
 
       <div class="scoreBox" style="margin-top:12px;">
         <div>
           <div class="muted">Votre placement</div>
-          <div style="font-weight:900;" id="guessValue">—</div>
+          <div style="font-weight:950;" id="guessValue">—</div>
         </div>
         <div style="text-align:right;">
           <div class="muted">Points</div>
           <div class="pts" id="points">—</div>
         </div>
       </div>
-
-      <div class="muted" style="margin-top:10px;">
-        Note : le secret n’est visible qu’après révélation.
-      </div>
     </div>
-
   </div>
 
-  <script>
-    // Paires (V1) — tu peux en ajouter autant que tu veux
-    const PAIRS = [
-      ["Froid", "Chaud"],
-      ["Mauvais film", "Chef-d’œuvre"],
-      ["Inconnu", "Très célèbre"],
-      ["Ennuyeux", "Passionnant"],
-      ["Sous-coté", "Sur-coté"],
-      ["Moche", "Magnifique"],
-      ["Pas du tout utile", "Indispensable"],
-      ["Calme", "Énervant"],
-      ["Trash", "Classe"],
-      ["Simple", "Complexe"],
-      ["Ringard", "Stylé"],
-      ["Impossible", "Facile"]
-    ];
+<script>
+/* ===== PAIRES “SPICY” =====
+   Format : [Gauche, Droite, (optionnel) hint]
+*/
+const PAIRS = [
+  ["Rappeur inconnu", "Rappeur légendaire", "Pense à notoriété / impact."],
+  ["Acteur éclaté", "Acteur immense", "Talent + aura + films cultes."],
+  ["Jeu vidéo niche", "Jeu vidéo mythique", "Tout le monde connaît vs connaisseurs."],
+  ["Musique pour pleurer", "Musique pour se chauffer", "Vibe triste vs motivation."],
+  ["Film qui endort", "Film impossible à lâcher", "Rythme / tension / fun."],
+  ["Humour gênant", "Humour masterclass", "Qualité de blague / timing."],
+  ["Influenceur random", "Influenceur incontournable", "Impact réel, pas juste vues."],
+  ["Série oubliable", "Série culte", "Rewatchable / citations."],
+  ["Skin pas ouf", "Skin iconique", "Fortnite/CoD/LOL etc."],
+  ["Mec toxique", "Mec green flag", "Comportement relationnel."],
+  ["Ville déprimante", "Ville incroyable", "Ambiance, sorties, beauté."],
+  ["Punchline faible", "Punchline assassine", "Réaction instantanée."],
+  ["Feat inutile", "Feat qui détruit le track", "La contribution change tout."],
+  ["Boss ridicule", "Boss terrifiant", "Pression + difficulté + design."],
+  ["Snack éclaté", "Snack divin", "Goût + addiction."],
+  ["Drip catastrophique", "Drip parfait", "Style, cohérence, aura."],
+  ["Sport tranquille", "Sport ultra violent", "Contact / risque / intensité."],
+  ["Argument bidon", "Argument imparable", "Logique, persuasion."],
+  ["Échec total", "Move de génie", "Décision vraiment smart."],
+  ["0/10 malaise", "10/10 charisme", "Présence, confiance, magnétisme."]
+];
 
-    const els = {
-      subtitle: document.getElementById("subtitle"),
-      pair: document.getElementById("pair"),
-      btnNew: document.getElementById("btn-new"),
-      btnSwitch: document.getElementById("btn-switch"),
-      screenPsychic: document.getElementById("screen-psychic"),
-      screenTeam: document.getElementById("screen-team"),
-      leftLabelP: document.getElementById("leftLabelP"),
-      rightLabelP: document.getElementById("rightLabelP"),
-      leftLabelT: document.getElementById("leftLabelT"),
-      rightLabelT: document.getElementById("rightLabelT"),
-      barPsychic: document.getElementById("barPsychic"),
-      barTeam: document.getElementById("barTeam"),
-      secretValue: document.getElementById("secretValue"),
-      guessValue: document.getElementById("guessValue"),
-      btnReveal: document.getElementById("btn-reveal"),
-      btnHide: document.getElementById("btn-hide"),
-      points: document.getElementById("points"),
-    };
+const els = {
+  subtitle: document.getElementById("subtitle"),
+  pair: document.getElementById("pair"),
+  pairHint: document.getElementById("pairHint"),
 
-    const state = {
-      mode: "team", // "psychic" | "team"
-      pair: PAIRS[0],
-      secret: 50,       // 0..100
-      zoneWidth: 22,    // largeur totale de zone (0..100)
-      guess: 50,        // 0..100
-      revealed: false
-    };
+  btnNew: document.getElementById("btn-new"),
+  btnSwitch: document.getElementById("btn-switch"),
 
-    function rndInt(min, max){
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-    function clamp(v, a, b){
-      return Math.max(a, Math.min(b, v));
-    }
+  screenPsychic: document.getElementById("screen-psychic"),
+  screenTeam: document.getElementById("screen-team"),
 
-    function pickPair(){
-      state.pair = PAIRS[rndInt(0, PAIRS.length-1)];
-    }
+  leftLabelP: document.getElementById("leftLabelP"),
+  rightLabelP: document.getElementById("rightLabelP"),
+  leftLabelT: document.getElementById("leftLabelT"),
+  rightLabelT: document.getElementById("rightLabelT"),
 
-    function newRound(){
-      pickPair();
-      state.secret = rndInt(0, 100);
-      state.zoneWidth = rndInt(18, 26);
-      state.guess = 50;
-      state.revealed = false;
-      els.points.textContent = "—";
-      els.guessValue.textContent = "—";
-      renderAll();
-    }
+  canvasPsychic: document.getElementById("canvasPsychic"),
+  canvasTeam: document.getElementById("canvasTeam"),
 
-    function setMode(mode){
-      state.mode = mode;
-      els.screenPsychic.classList.toggle("show", mode === "psychic");
-      els.screenTeam.classList.toggle("show", mode === "team");
-      els.btnSwitch.textContent = (mode === "team") ? "Passer au Psychic" : "Passer à l’Équipe";
-      els.subtitle.textContent = (mode === "team")
-        ? "L’équipe place le curseur. Révélez pour voir le secret et scorer."
-        : "Le Psychic voit le secret. Donne un indice puis passe le téléphone.";
-      renderAll();
-    }
+  secretValue: document.getElementById("secretValue"),
+  zoneInfo: document.getElementById("zoneInfo"),
 
-    // Scoring simplifié 4/3/2/1/0
-    // On crée 4 “bandes” concentriques dans la zoneWidth
-    function computePoints(secret, guess, zoneWidth){
-      const half = zoneWidth / 2;
-      const d = Math.abs(guess - secret);
+  btnReveal: document.getElementById("btn-reveal"),
+  btnHide: document.getElementById("btn-hide"),
+  guessValue: document.getElementById("guessValue"),
+  points: document.getElementById("points")
+};
 
-      // 4 paliers (centre => 4)
-      const t1 = half * 0.25;
-      const t2 = half * 0.50;
-      const t3 = half * 0.75;
-      const t4 = half * 1.00;
+const state = {
+  mode: "team",          // "psychic" | "team"
+  pair: PAIRS[0],        // [L, R, hint]
+  secret: 50,            // 0..100
+  zoneWidth: 22,         // largeur totale zone (en points 0..100)
+  guess: 50,             // 0..100
+  revealed: false
+};
 
-      if(d <= t1) return 4;
-      if(d <= t2) return 3;
-      if(d <= t3) return 2;
-      if(d <= t4) return 1;
-      return 0;
-    }
+function rndInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+function pickPair(){ state.pair = PAIRS[rndInt(0, PAIRS.length-1)]; }
 
-    function barSetup(barEl){
-      barEl.innerHTML = "";
+function newRound(){
+  pickPair();
+  state.secret = rndInt(0,100);
+  state.zoneWidth = rndInt(18,26);   // feeling proche du jeu
+  state.guess = 50;
+  state.revealed = false;
+  els.points.textContent = "—";
+  els.guessValue.textContent = "—";
+  renderAll();
+}
 
-      // ticks
-      for(let i=1;i<10;i++){
-        const tick = document.createElement("div");
-        tick.className = "tick";
-        tick.style.left = (i*10) + "%";
-        barEl.appendChild(tick);
-      }
+function setMode(mode){
+  state.mode = mode;
+  els.screenPsychic.classList.toggle("show", mode==="psychic");
+  els.screenTeam.classList.toggle("show", mode==="team");
+  els.btnSwitch.textContent = (mode==="team") ? "Passer au Psychic" : "Passer à l’Équipe";
+  els.subtitle.textContent = (mode==="team")
+    ? "L’équipe place l’aiguille. Révélez pour afficher la zone et scorer."
+    : "Le Psychic voit la cible + la zone. Donne un indice, puis passe le téléphone.";
+  renderAll();
+}
 
-      const zone = document.createElement("div");
-      zone.className = "zone";
-      zone.dataset.role = "zone";
-      barEl.appendChild(zone);
+/* ===== SCORING (simplifié 4/3/2/1/0) ===== */
+function computePoints(secret, guess, zoneWidth){
+  const half = zoneWidth / 2;
+  const d = Math.abs(guess - secret);
+  const t1 = half * 0.25;
+  const t2 = half * 0.50;
+  const t3 = half * 0.75;
+  const t4 = half * 1.00;
+  if(d <= t1) return 4;
+  if(d <= t2) return 3;
+  if(d <= t3) return 2;
+  if(d <= t4) return 1;
+  return 0;
+}
 
-      const needle = document.createElement("div");
-      needle.className = "needle";
-      needle.dataset.role = "needle";
-      barEl.appendChild(needle);
-    }
+/* ===== DEMI-CERCLE RENDER ===== */
+function pctToAngle(pct){
+  // pct=0 à gauche => 180°, pct=100 à droite => 0°
+  return Math.PI * (1 - pct/100);
+}
 
-    function barElements(barEl){
-      return {
-        zone: barEl.querySelector('[data-role="zone"]'),
-        needle: barEl.querySelector('[data-role="needle"]')
-      };
-    }
+function drawGauge(canvas, opts){
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
 
-    function positionZone(barEl, secret, zoneWidth, visible){
-      const { zone } = barElements(barEl);
-      const half = zoneWidth / 2;
-      const left = clamp(secret - half, 0, 100);
-      const right = clamp(secret + half, 0, 100);
-      zone.style.left = left + "%";
-      zone.style.width = (right - left) + "%";
-      zone.style.display = visible ? "block" : "none";
-    }
+  const cx = W/2;
+  const cy = H*0.90;
+  const r  = Math.min(W*0.42, H*0.72);
 
-    function positionNeedle(barEl, value){
-      const { needle } = barElements(barEl);
-      needle.style.left = clamp(value, 0, 100) + "%";
-    }
+  // background subtle
+  ctx.save();
+  ctx.fillStyle = "rgba(255,255,255,0.03)";
+  ctx.beginPath();
+  ctx.roundRect(18, 18, W-36, H-36, 22);
+  ctx.fill();
+  ctx.restore();
 
-    function renderPair(){
-      const [L,R] = state.pair;
-      els.pair.innerHTML = `<span>${L}</span> ↔ <span>${R}</span>`;
-      els.leftLabelP.textContent = L;
-      els.rightLabelP.textContent = R;
-      els.leftLabelT.textContent = L;
-      els.rightLabelT.textContent = R;
-    }
+  // arc base
+  const arcW = r*0.20;
+  ctx.lineCap = "round";
 
-    function renderBars(){
-      // Psychic: voit zone + secret + aiguille sur secret
-      positionZone(els.barPsychic, state.secret, state.zoneWidth, true);
-      positionNeedle(els.barPsychic, state.secret);
+  // base arc
+  ctx.save();
+  ctx.strokeStyle = "rgba(255,255,255,0.12)";
+  ctx.lineWidth = arcW;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, Math.PI, 0, false);
+  ctx.stroke();
+  ctx.restore();
 
-      // Team: ne voit zone que si revealed
-      positionZone(els.barTeam, state.secret, state.zoneWidth, state.revealed);
-      positionNeedle(els.barTeam, state.guess);
-    }
+  // ticks (10)
+  ctx.save();
+  ctx.strokeStyle = "rgba(255,255,255,0.16)";
+  ctx.lineWidth = 4;
+  for(let i=0;i<=10;i++){
+    const pct = i*10;
+    const a = pctToAngle(pct);
+    const x1 = cx + Math.cos(a)*(r - arcW*0.65);
+    const y1 = cy - Math.sin(a)*(r - arcW*0.65);
+    const x2 = cx + Math.cos(a)*(r + arcW*0.10);
+    const y2 = cy - Math.sin(a)*(r + arcW*0.10);
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  }
+  ctx.restore();
 
-    function renderAll(){
-      renderPair();
-      els.secretValue.textContent = state.secret;
-      renderBars();
-    }
+  // zone (if visible)
+  if(opts.showZone){
+    const half = opts.zoneWidth/2;
+    const leftPct  = clamp(opts.secret - half, 0, 100);
+    const rightPct = clamp(opts.secret + half, 0, 100);
+    const a1 = pctToAngle(rightPct); // note: angle inversé
+    const a2 = pctToAngle(leftPct);
 
-    function setGuessFromEvent(barEl, ev){
-      const rect = barEl.getBoundingClientRect();
-      const clientX = (ev.touches && ev.touches[0]) ? ev.touches[0].clientX : ev.clientX;
-      const x = clamp(clientX - rect.left, 0, rect.width);
-      const pct = Math.round((x / rect.width) * 100);
-      state.guess = pct;
-      els.guessValue.textContent = pct;
-      positionNeedle(barEl, pct);
-    }
+    ctx.save();
+    ctx.strokeStyle = "rgba(34,197,94,0.22)";
+    ctx.lineWidth = arcW;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, a1, a2, false);
+    ctx.stroke();
 
-    // Events
-    els.btnNew.onclick = ()=> newRound();
+    // inner highlight
+    ctx.strokeStyle = "rgba(34,197,94,0.38)";
+    ctx.lineWidth = arcW*0.35;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, a1, a2, false);
+    ctx.stroke();
+    ctx.restore();
+  }
 
-    els.btnSwitch.onclick = ()=>{
-      setMode(state.mode === "team" ? "psychic" : "team");
-    };
+  // needle
+  const needlePct = opts.needlePct;
+  const aN = pctToAngle(needlePct);
+  const nx = cx + Math.cos(aN)*(r + arcW*0.25);
+  const ny = cy - Math.sin(aN)*(r + arcW*0.25);
 
-    // Drag/click on team bar
-    let dragging = false;
-    els.barTeam.addEventListener("pointerdown", (e)=>{
-      dragging = true;
-      els.barTeam.setPointerCapture(e.pointerId);
-      setGuessFromEvent(els.barTeam, e);
+  ctx.save();
+  // needle line
+  ctx.strokeStyle = "rgba(255,255,255,0.92)";
+  ctx.lineWidth = 8;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(nx, ny);
+  ctx.stroke();
+
+  // knob
+  ctx.fillStyle = "rgba(255,255,255,0.92)";
+  ctx.beginPath();
+  ctx.arc(cx, cy, 16, 0, Math.PI*2);
+  ctx.fill();
+
+  // knob ring
+  ctx.strokeStyle = "rgba(0,0,0,0.25)";
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 16, 0, Math.PI*2);
+  ctx.stroke();
+  ctx.restore();
+
+  // subtle glow at needle tip
+  ctx.save();
+  ctx.fillStyle = "rgba(255,255,255,0.20)";
+  ctx.beginPath();
+  ctx.arc(nx, ny, 18, 0, Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+
+  // secret marker (psychic only)
+  if(opts.showSecretMarker){
+    const aS = pctToAngle(opts.secret);
+    const sx = cx + Math.cos(aS)*(r - arcW*0.05);
+    const sy = cy - Math.sin(aS)*(r - arcW*0.05);
+
+    ctx.save();
+    ctx.fillStyle = "rgba(249,115,22,0.95)";
+    ctx.beginPath();
+    ctx.arc(sx, sy, 9, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // caption
+  ctx.save();
+  ctx.fillStyle = "rgba(255,255,255,0.68)";
+  ctx.font = "800 22px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText(opts.caption || "", cx, 56);
+  ctx.restore();
+}
+
+function renderPair(){
+  const [L,R,hint] = state.pair;
+  els.pair.innerHTML = `
+    <span class="pill">${L}</span>
+    <span class="vs">↔</span>
+    <span class="pill">${R}</span>
+  `;
+  els.pairHint.textContent = hint ? hint : "Le Psychic donne un indice : l’équipe place l’aiguille.";
+  els.leftLabelP.textContent = L;
+  els.rightLabelP.textContent = R;
+  els.leftLabelT.textContent = L;
+  els.rightLabelT.textContent = R;
+}
+
+function renderAll(){
+  renderPair();
+
+  els.secretValue.textContent = state.secret;
+  els.zoneInfo.textContent = "Zone: " + state.zoneWidth;
+
+  // Psychic canvas: needle = secret, zone visible, secret marker visible
+  drawGauge(els.canvasPsychic, {
+    showZone: true,
+    showSecretMarker: true,
+    secret: state.secret,
+    zoneWidth: state.zoneWidth,
+    needlePct: state.secret,
+    caption: "Psychic"
+  });
+
+  // Team canvas: needle = guess, zone only if revealed
+  drawGauge(els.canvasTeam, {
+    showZone: state.revealed,
+    showSecretMarker: state.revealed,  // on montre le point secret après reveal
+    secret: state.secret,
+    zoneWidth: state.zoneWidth,
+    needlePct: state.guess,
+    caption: state.revealed ? "Révélation" : "Équipe"
+  });
+}
+
+/* Interaction équipe (drag/click demi-cercle) */
+let dragging = false;
+function setGuessFromPointer(canvas, ev){
+  const rect = canvas.getBoundingClientRect();
+  const x = clamp((ev.clientX - rect.left) / rect.width, 0, 1);
+  // On mappe x (0..1) -> pct (0..100) directement
+  const pct = Math.round(x * 100);
+  state.guess = pct;
+  els.guessValue.textContent = pct;
+  if(!state.revealed){
+    drawGauge(canvas, {
+      showZone:false,
+      showSecretMarker:false,
+      secret: state.secret,
+      zoneWidth: state.zoneWidth,
+      needlePct: state.guess,
+      caption:"Équipe"
     });
-    els.barTeam.addEventListener("pointermove", (e)=>{
-      if(!dragging) return;
-      setGuessFromEvent(els.barTeam, e);
-    });
-    els.barTeam.addEventListener("pointerup", ()=>{
-      dragging = false;
-    });
+  } else {
+    renderAll();
+  }
+}
 
-    els.btnReveal.onclick = ()=>{
-      state.revealed = true;
-      const pts = computePoints(state.secret, state.guess, state.zoneWidth);
-      els.points.textContent = pts + " / 4";
-      renderBars();
-    };
+els.canvasTeam.addEventListener("pointerdown", (e)=>{
+  dragging = true;
+  els.canvasTeam.setPointerCapture(e.pointerId);
+  setGuessFromPointer(els.canvasTeam, e);
+});
+els.canvasTeam.addEventListener("pointermove", (e)=>{
+  if(!dragging) return;
+  setGuessFromPointer(els.canvasTeam, e);
+});
+els.canvasTeam.addEventListener("pointerup", ()=>{
+  dragging = false;
+});
+els.canvasTeam.addEventListener("pointercancel", ()=>{
+  dragging = false;
+});
 
-    els.btnHide.onclick = ()=>{
-      state.revealed = false;
-      els.points.textContent = "—";
-      renderBars();
-    };
+/* Buttons */
+els.btnNew.onclick = ()=> newRound();
+els.btnSwitch.onclick = ()=> setMode(state.mode === "team" ? "psychic" : "team");
 
-    // init
-    barSetup(els.barPsychic);
-    barSetup(els.barTeam);
-    newRound();
-    setMode("team");
-  </script>
+els.btnReveal.onclick = ()=>{
+  state.revealed = true;
+  const pts = computePoints(state.secret, state.guess, state.zoneWidth);
+  els.points.textContent = pts + " / 4";
+  renderAll();
+};
+els.btnHide.onclick = ()=>{
+  state.revealed = false;
+  els.points.textContent = "—";
+  renderAll();
+};
+
+/* init */
+newRound();
+setMode("team");
+</script>
 </body>
 </html>
