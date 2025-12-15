@@ -502,6 +502,8 @@ function renderPair(){
 function pctToAngle(pct){
   // 0% = gauche (PI), 100% = droite (0)
   return Math.PI - (pct/100) * Math.PI;
+}
+
 function bandColorForPct(pct){
   const d = Math.abs(pct - secret);
   if (d <= Z_GREEN)  return "rgba(34,197,94,.80)";   // vert
@@ -513,9 +515,8 @@ function bandColorForPct(pct){
 function drawScoringBandsSampled(cx, cy, r){
   const ringR = r - 20;     // anneau intérieur
   const lw = 20;            // épaisseur des bandes
-  const step = 0.25;        // précision: plus petit = plus lisse (0.25 ou 0.5)
+  const step = 0.25;        // précision
 
-  // On ne peint que dans [secret-8 ; secret+8] pour perf + clarté
   const startPct = clamp(secret - Z_RED, 0, 100);
   const endPct   = clamp(secret + Z_RED, 0, 100);
 
@@ -525,7 +526,6 @@ function drawScoringBandsSampled(cx, cy, r){
 
   for(let p = startPct; p < endPct; p += step){
     const p2 = Math.min(p + step, endPct);
-
     const col = bandColorForPct((p + p2) / 2);
     if(!col) continue;
 
@@ -540,7 +540,7 @@ function drawScoringBandsSampled(cx, cy, r){
 
   ctx.restore();
 }
-}
+
 function drawBaseArc(cx,cy,r){
   ctx.save();
   ctx.strokeStyle="rgba(255,255,255,.18)";
@@ -548,24 +548,6 @@ function drawBaseArc(cx,cy,r){
   ctx.lineCap="round";
   ctx.beginPath();
   ctx.arc(cx,cy,r,Math.PI,0,false);
-  ctx.stroke();
-  ctx.restore();
-}
-
-function drawZone(radiusPct, color, cx,cy,r){
-  const leftPct  = clamp(secret - radiusPct, 0, 100);
-  const rightPct = clamp(secret + radiusPct, 0, 100);
-
-  const aLeft  = pctToAngle(leftPct);   // proche de PI
-  const aRight = pctToAngle(rightPct);  // proche de 0
-
-  // arc() attend startAngle -> endAngle. Ici aLeft > aRight donc c'est correct.
-  ctx.save();
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 44;
-  ctx.lineCap = "butt";
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, aLeft, aRight, false);
   ctx.stroke();
   ctx.restore();
 }
@@ -587,15 +569,14 @@ function drawNeedle(pct, color, width, cx,cy,r){
 }
 
 function drawDial({mode}){
-  // mode: "psychic" | "team" | "reveal"
   ctx.clearRect(0,0,900,520);
   const cx=450, cy=460, r=320;
 
   drawBaseArc(cx,cy,r);
 
   if(mode === "reveal"){
-  drawScoringBandsSampled(cx, cy, r);
-}
+    drawScoringBandsSampled(cx, cy, r);
+  }
 
   // Center hub
   ctx.save();
@@ -606,10 +587,8 @@ function drawDial({mode}){
   ctx.restore();
 
   if(mode === "psychic"){
-    // Psychic voit l’aiguille sur le secret (fine) + marker orange
     drawNeedle(secret, "rgba(255,255,255,.90)", 6, cx,cy,r);
 
-    // petit point secret
     const as = pctToAngle(secret);
     ctx.save();
     ctx.fillStyle = "#f97316";
@@ -622,7 +601,6 @@ function drawDial({mode}){
   if(mode === "team"){
     drawNeedle(currentNeedle, "rgba(255,255,255,.92)", 6, cx,cy,r);
 
-    // affichage valeur en haut
     ctx.save();
     ctx.fillStyle="rgba(255,255,255,.88)";
     ctx.font="900 32px Arial";
@@ -635,10 +613,8 @@ function drawDial({mode}){
   }
 
   if(mode === "reveal"){
-    // secret = barre blanche épaisse
     drawNeedle(secret, "rgba(255,255,255,.95)", 11, cx,cy,r);
 
-    // guesses = barres fines colorées
     for(const p of players){
       if(p.id === players[psychicIndex].id) continue;
       const g = guesses[p.id];
@@ -646,7 +622,6 @@ function drawDial({mode}){
       drawNeedle(g, p.color, 5, cx,cy,r);
     }
 
-    // repère secret (petit point orange)
     const as = pctToAngle(secret);
     ctx.save();
     ctx.fillStyle = "#f97316";
