@@ -1,609 +1,307 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Wavelength – Mobile</title>
-  <style>
-    :root{
-      --bg:#070b14;
-      --panel:rgba(255,255,255,.06);
-      --border:rgba(255,255,255,.12);
-      --text:#f9fafb;
-      --muted:rgba(255,255,255,.72);
-      --accent:#f97316;
-      --good:#22c55e;
-      --warn:#fbbf24;
-      --shadow: 0 18px 55px rgba(0,0,0,.45);
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: Arial, sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(900px 550px at 15% 0%, rgba(249,115,22,.12), transparent 55%),
-        radial-gradient(900px 550px at 85% 15%, rgba(59,130,246,.12), transparent 55%),
-        radial-gradient(900px 550px at 50% 100%, rgba(34,197,94,.08), transparent 60%),
-        var(--bg);
-      padding: 12px;
-      display:flex;
-      justify-content:center;
-    }
-    .app{
-      width: min(760px, 100%);
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-    .panel{
-      border:1px solid var(--border);
-      background: var(--panel);
-      border-radius:16px;
-      padding:14px;
-      backdrop-filter: blur(8px);
-      box-shadow: var(--shadow);
-    }
-    .top{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    h1{ margin:0; font-size:18px; letter-spacing:.2px; }
-    .muted{ color:var(--muted); font-size:12px; line-height:1.35; }
-    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Wavelength – Mobile</title>
 
-    .btn{
-      padding:10px 14px;
-      border-radius:999px;
-      border:1px solid var(--border);
-      background: rgba(0,0,0,.18);
-      color:var(--text);
-      font-weight:900;
-      cursor:pointer;
-      user-select:none;
-      transition: transform .08s ease, border-color .12s ease, box-shadow .12s ease, filter .12s ease;
-    }
-    .btn:hover{ transform: translateY(-1px); border-color: rgba(249,115,22,.50); }
-    .btn:active{ transform: translateY(0); }
-    .btn-primary{
-      background: linear-gradient(180deg, rgba(249,115,22,.95), rgba(249,115,22,.82));
-      border-color: rgba(249,115,22,.85);
-      color:#0b1220;
-      box-shadow: 0 10px 22px rgba(249,115,22,.18);
-    }
-    .btn-green{
-      background: rgba(34,197,94,.16);
-      border-color: rgba(34,197,94,.35);
-    }
-    .btn-ghost{
-      background: rgba(0,0,0,.10);
-    }
+<style>
+:root{
+  --bg:#0b1220;
+  --panel:rgba(255,255,255,.06);
+  --border:rgba(255,255,255,.14);
+  --text:#f9fafb;
+  --muted:rgba(255,255,255,.70);
+  --accent:#f97316;
+  --green:#22c55e;
+}
 
-    .pairCard{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      text-align:center;
-      padding: 14px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.16);
-    }
-    .pair{
-      font-weight:950;
-      font-size:18px;
-      line-height:1.2;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    .pill{
-      padding: 8px 12px;
-      border-radius: 999px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      min-width: 150px;
-    }
-    .vs{
-      color: rgba(255,255,255,.78);
-      font-weight:900;
-    }
+*{box-sizing:border-box}
 
-    .screen{ display:none; }
-    .screen.show{ display:block; }
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:radial-gradient(900px 500px at 20% 0%, rgba(249,115,22,.12), transparent 60%), var(--bg);
+  color:var(--text);
+  padding:12px;
+  display:flex;
+  justify-content:center;
+}
 
-    .canvasWrap{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      align-items:center;
-    }
-    canvas{
-      width: 100%;
-      max-width: 560px;
-      height: auto;
-      border-radius: 18px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.14);
-      box-shadow: 0 16px 40px rgba(0,0,0,.35);
-      touch-action: none;
-    }
-    .labels{
-      width: min(560px, 100%);
-      display:flex;
-      justify-content:space-between;
-      font-size:12px;
-      color: rgba(255,255,255,.82);
-      margin-top:-2px;
-      padding: 0 6px;
-    }
+.app{
+  width:min(760px,100%);
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
 
-    .secretBox{
-      width:100%;
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:space-between;
-      align-items:center;
-      padding: 12px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.16);
-    }
-    .bigNum{ font-size:28px; font-weight:950; letter-spacing:.2px; }
-    .badge{
-      padding: 6px 10px;
-      border-radius: 999px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      font-size:12px;
-      color: rgba(255,255,255,.86);
-      font-weight:900;
-      white-space:nowrap;
-    }
-    .scoreBox{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      padding: 12px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.16);
-    }
-    .scoreBox .pts{
-      font-size:22px;
-      font-weight:950;
-    }
-  </style>
+.panel{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:14px;
+}
+
+.turn{
+  text-align:center;
+  font-size:26px;
+  font-weight:900;
+}
+
+.subturn{
+  text-align:center;
+  font-size:14px;
+  color:var(--muted);
+}
+
+.pair{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  font-weight:900;
+  font-size:18px;
+}
+
+.pill{
+  padding:8px 14px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  border:1px solid var(--border);
+}
+
+canvas{
+  width:100%;
+  max-width:560px;
+  margin:auto;
+  display:block;
+  border-radius:18px;
+  background:rgba(0,0,0,.2);
+  border:1px solid var(--border);
+}
+
+button{
+  padding:12px 18px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:rgba(0,0,0,.2);
+  color:var(--text);
+  font-weight:900;
+  cursor:pointer;
+}
+
+button.primary{
+  background:linear-gradient(180deg, #f97316, #fb923c);
+  color:#111;
+}
+
+button.green{
+  background:rgba(34,197,94,.25);
+  border-color:rgba(34,197,94,.5);
+}
+
+.hidden{display:none}
+
+.scoreline{
+  display:flex;
+  justify-content:space-between;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:rgba(0,0,0,.2);
+}
+</style>
 </head>
 
 <body>
-  <div class="app">
-    <div class="panel">
-      <div class="top">
-        <h1>Wavelength – Mobile</h1>
-        <div class="row">
-          <button id="btn-new" class="btn btn-ghost">Nouvelle manche</button>
-          <button id="btn-switch" class="btn btn-primary">Passer au Psychic</button>
-        </div>
-      </div>
-      <div class="muted" id="subtitle"></div>
-    </div>
+<div class="app">
 
-    <div class="panel pairCard">
-      <div class="pair" id="pair">
-        <span class="pill">…</span>
-        <span class="vs">↔</span>
-        <span class="pill">…</span>
-      </div>
-      <div class="muted" id="pairHint"></div>
-    </div>
+<!-- HEADER -->
+<div class="panel">
+  <div class="turn" id="turnTitle">Configuration</div>
+  <div class="subturn" id="turnSub"></div>
+</div>
 
-    <!-- Psychic -->
-    <div class="panel screen" id="screen-psychic">
-      <div class="row" style="justify-content:space-between;">
-        <div class="badge">Écran Psychic (secret)</div>
-        <div class="muted">Donne un indice, puis passe le téléphone.</div>
-      </div>
+<!-- PAIR -->
+<div class="panel">
+  <div class="pair" id="pair"></div>
+</div>
 
-      <div class="secretBox" style="margin-top:12px;">
-        <div>
-          <div class="muted">Position secrète</div>
-          <div class="bigNum" id="secretValue">—</div>
-        </div>
-        <div class="row">
-          <span class="badge" id="zoneInfo">Zone: —</span>
-          <span class="badge">0 ⇢ 100</span>
-        </div>
-      </div>
+<!-- CANVAS -->
+<div class="panel">
+  <canvas id="canvas" width="800" height="500"></canvas>
+</div>
 
-      <div class="canvasWrap" style="margin-top:12px;">
-        <canvas id="canvasPsychic" width="900" height="520"></canvas>
-        <div class="labels">
-          <div id="leftLabelP">Gauche</div>
-          <div id="rightLabelP">Droite</div>
-        </div>
-      </div>
-    </div>
+<!-- ACTION -->
+<div class="panel" style="text-align:center;">
+  <button id="actionBtn" class="primary">Commencer</button>
+</div>
 
-    <!-- Team -->
-    <div class="panel screen" id="screen-team">
-      <div class="row" style="justify-content:space-between;">
-        <div class="badge">Écran Équipe</div>
-        <div class="muted">Glissez pour placer l’aiguille.</div>
-      </div>
+<!-- SCORES -->
+<div class="panel hidden" id="scoresPanel">
+  <h3>Scores</h3>
+  <div id="scores"></div>
+</div>
 
-      <div class="canvasWrap" style="margin-top:12px;">
-        <canvas id="canvasTeam" width="900" height="520"></canvas>
-        <div class="labels">
-          <div id="leftLabelT">Gauche</div>
-          <div id="rightLabelT">Droite</div>
-        </div>
-      </div>
-
-      <div class="row" style="margin-top:12px;">
-        <button id="btn-reveal" class="btn btn-green">Révéler & scorer</button>
-        <button id="btn-hide" class="btn btn-ghost">Cacher</button>
-      </div>
-
-      <div class="scoreBox" style="margin-top:12px;">
-        <div>
-          <div class="muted">Votre placement</div>
-          <div style="font-weight:950;" id="guessValue">—</div>
-        </div>
-        <div style="text-align:right;">
-          <div class="muted">Points</div>
-          <div class="pts" id="points">—</div>
-        </div>
-      </div>
-    </div>
-  </div>
+</div>
 
 <script>
-/* ===== PAIRES “SPICY” =====
-   Format : [Gauche, Droite, (optionnel) hint]
-*/
+/* ===================== CONFIG ===================== */
 const PAIRS = [
-  ["Rappeur inconnu", "Rappeur légendaire", "Pense à notoriété / impact."],
-  ["Acteur éclaté", "Acteur immense", "Talent + aura + films cultes."],
-  ["Jeu vidéo niche", "Jeu vidéo mythique", "Tout le monde connaît vs connaisseurs."],
-  ["Musique pour pleurer", "Musique pour se chauffer", "Vibe triste vs motivation."],
-  ["Film qui endort", "Film impossible à lâcher", "Rythme / tension / fun."],
-  ["Humour gênant", "Humour masterclass", "Qualité de blague / timing."],
-  ["Influenceur random", "Influenceur incontournable", "Impact réel, pas juste vues."],
-  ["Série oubliable", "Série culte", "Rewatchable / citations."],
-  ["Skin pas ouf", "Skin iconique", "Fortnite/CoD/LOL etc."],
-  ["Mec toxique", "Mec green flag", "Comportement relationnel."],
-  ["Ville déprimante", "Ville incroyable", "Ambiance, sorties, beauté."],
-  ["Punchline faible", "Punchline assassine", "Réaction instantanée."],
-  ["Feat inutile", "Feat qui détruit le track", "La contribution change tout."],
-  ["Boss ridicule", "Boss terrifiant", "Pression + difficulté + design."],
-  ["Snack éclaté", "Snack divin", "Goût + addiction."],
-  ["Drip catastrophique", "Drip parfait", "Style, cohérence, aura."],
-  ["Sport tranquille", "Sport ultra violent", "Contact / risque / intensité."],
-  ["Argument bidon", "Argument imparable", "Logique, persuasion."],
-  ["Échec total", "Move de génie", "Décision vraiment smart."],
-  ["0/10 malaise", "10/10 charisme", "Présence, confiance, magnétisme."]
+ ["Rappeur inconnu","Rappeur légendaire"],
+ ["Acteur éclaté","Acteur immense"],
+ ["Jeu vidéo niche","Jeu vidéo mythique"],
+ ["Punchline faible","Punchline assassine"],
+ ["Ville éclatée","Ville incroyable"],
+ ["Film chiant","Film addictif"],
+ ["Humour gênant","Humour masterclass"]
 ];
 
-const els = {
-  subtitle: document.getElementById("subtitle"),
-  pair: document.getElementById("pair"),
-  pairHint: document.getElementById("pairHint"),
+/* ===================== STATE ===================== */
+let players = [];
+let psychicIndex = 0;
+let phase = "setup"; // setup | psychic | team | reveal
+let currentTeamIndex = 0;
 
-  btnNew: document.getElementById("btn-new"),
-  btnSwitch: document.getElementById("btn-switch"),
+let secret = 0;
+let zone = 0;
+let guesses = {};
 
-  screenPsychic: document.getElementById("screen-psychic"),
-  screenTeam: document.getElementById("screen-team"),
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 
-  leftLabelP: document.getElementById("leftLabelP"),
-  rightLabelP: document.getElementById("rightLabelP"),
-  leftLabelT: document.getElementById("leftLabelT"),
-  rightLabelT: document.getElementById("rightLabelT"),
+/* ===================== UTILS ===================== */
+const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 
-  canvasPsychic: document.getElementById("canvasPsychic"),
-  canvasTeam: document.getElementById("canvasTeam"),
+/* ===================== DRAW ===================== */
+function draw(needle, showZone=false, showSecret=false){
+ ctx.clearRect(0,0,800,500);
+ const cx=400, cy=430, r=300;
 
-  secretValue: document.getElementById("secretValue"),
-  zoneInfo: document.getElementById("zoneInfo"),
+ ctx.strokeStyle="rgba(255,255,255,.2)";
+ ctx.lineWidth=60;
+ ctx.beginPath();
+ ctx.arc(cx,cy,r,Math.PI,0);
+ ctx.stroke();
 
-  btnReveal: document.getElementById("btn-reveal"),
-  btnHide: document.getElementById("btn-hide"),
-  guessValue: document.getElementById("guessValue"),
-  points: document.getElementById("points")
-};
+ if(showZone){
+   const a1=Math.PI*(1-(secret-zone/2)/100);
+   const a2=Math.PI*(1-(secret+zone/2)/100);
+   ctx.strokeStyle="rgba(34,197,94,.35)";
+   ctx.lineWidth=60;
+   ctx.beginPath();
+   ctx.arc(cx,cy,r,a2,a1);
+   ctx.stroke();
+ }
 
-const state = {
-  mode: "team",          // "psychic" | "team"
-  pair: PAIRS[0],        // [L, R, hint]
-  secret: 50,            // 0..100
-  zoneWidth: 22,         // largeur totale zone (en points 0..100)
-  guess: 50,             // 0..100
-  revealed: false
-};
+ const a=Math.PI*(1-needle/100);
+ const nx=cx+Math.cos(a)*r;
+ const ny=cy-Math.sin(a)*r;
 
-function rndInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
-function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
-function pickPair(){ state.pair = PAIRS[rndInt(0, PAIRS.length-1)]; }
+ ctx.strokeStyle="#fff";
+ ctx.lineWidth=6;
+ ctx.beginPath();
+ ctx.moveTo(cx,cy);
+ ctx.lineTo(nx,ny);
+ ctx.stroke();
 
-function newRound(){
-  pickPair();
-  state.secret = rndInt(0,100);
-  state.zoneWidth = rndInt(18,26);   // feeling proche du jeu
-  state.guess = 50;
-  state.revealed = false;
-  els.points.textContent = "—";
-  els.guessValue.textContent = "—";
-  renderAll();
+ ctx.fillStyle="#fff";
+ ctx.beginPath();
+ ctx.arc(cx,cy,12,0,Math.PI*2);
+ ctx.fill();
+
+ if(showSecret){
+   const as=Math.PI*(1-secret/100);
+   ctx.fillStyle="#f97316";
+   ctx.beginPath();
+   ctx.arc(cx+Math.cos(as)*r, cy-Math.sin(as)*r, 8,0,Math.PI*2);
+   ctx.fill();
+ }
 }
 
-function setMode(mode){
-  state.mode = mode;
-  els.screenPsychic.classList.toggle("show", mode==="psychic");
-  els.screenTeam.classList.toggle("show", mode==="team");
-  els.btnSwitch.textContent = (mode==="team") ? "Passer au Psychic" : "Passer à l’Équipe";
-  els.subtitle.textContent = (mode==="team")
-    ? "L’équipe place l’aiguille. Révélez pour afficher la zone et scorer."
-    : "Le Psychic voit la cible + la zone. Donne un indice, puis passe le téléphone.";
-  renderAll();
+/* ===================== FLOW ===================== */
+function startGame(){
+ players = prompt("Pseudos séparés par des virgules").split(",").map(p=>({name:p.trim(),score:0}));
+ psychicIndex = rand(0, players.length-1);
+ nextRound();
 }
 
-/* ===== SCORING (simplifié 4/3/2/1/0) ===== */
-function computePoints(secret, guess, zoneWidth){
-  const half = zoneWidth / 2;
-  const d = Math.abs(guess - secret);
-  const t1 = half * 0.25;
-  const t2 = half * 0.50;
-  const t3 = half * 0.75;
-  const t4 = half * 1.00;
-  if(d <= t1) return 4;
-  if(d <= t2) return 3;
-  if(d <= t3) return 2;
-  if(d <= t4) return 1;
-  return 0;
+function nextRound(){
+ guesses={};
+ secret=rand(0,100);
+ zone=rand(18,26);
+ currentTeamIndex=0;
+ phase="psychic";
+ updateUI();
 }
 
-/* ===== DEMI-CERCLE RENDER ===== */
-function pctToAngle(pct){
-  // pct=0 à gauche => 180°, pct=100 à droite => 0°
-  return Math.PI * (1 - pct/100);
+function nextTeam(){
+ do{ currentTeamIndex++; } 
+ while(players[currentTeamIndex]?.isPsychic);
+ if(currentTeamIndex>=players.length){
+   phase="reveal";
+ } else phase="team";
+ updateUI();
 }
 
-function drawGauge(canvas, opts){
-  const ctx = canvas.getContext("2d");
-  const W = canvas.width, H = canvas.height;
-  ctx.clearRect(0,0,W,H);
-
-  const cx = W/2;
-  const cy = H*0.90;
-  const r  = Math.min(W*0.42, H*0.72);
-
-  // background subtle
-  ctx.save();
-  ctx.fillStyle = "rgba(255,255,255,0.03)";
-  ctx.beginPath();
-  ctx.roundRect(18, 18, W-36, H-36, 22);
-  ctx.fill();
-  ctx.restore();
-
-  // arc base
-  const arcW = r*0.20;
-  ctx.lineCap = "round";
-
-  // base arc
-  ctx.save();
-  ctx.strokeStyle = "rgba(255,255,255,0.12)";
-  ctx.lineWidth = arcW;
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, Math.PI, 0, false);
-  ctx.stroke();
-  ctx.restore();
-
-  // ticks (10)
-  ctx.save();
-  ctx.strokeStyle = "rgba(255,255,255,0.16)";
-  ctx.lineWidth = 4;
-  for(let i=0;i<=10;i++){
-    const pct = i*10;
-    const a = pctToAngle(pct);
-    const x1 = cx + Math.cos(a)*(r - arcW*0.65);
-    const y1 = cy - Math.sin(a)*(r - arcW*0.65);
-    const x2 = cx + Math.cos(a)*(r + arcW*0.10);
-    const y2 = cy - Math.sin(a)*(r + arcW*0.10);
-    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
-  }
-  ctx.restore();
-
-  // zone (if visible)
-  if(opts.showZone){
-    const half = opts.zoneWidth/2;
-    const leftPct  = clamp(opts.secret - half, 0, 100);
-    const rightPct = clamp(opts.secret + half, 0, 100);
-    const a1 = pctToAngle(rightPct); // note: angle inversé
-    const a2 = pctToAngle(leftPct);
-
-    ctx.save();
-    ctx.strokeStyle = "rgba(34,197,94,0.22)";
-    ctx.lineWidth = arcW;
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, a1, a2, false);
-    ctx.stroke();
-
-    // inner highlight
-    ctx.strokeStyle = "rgba(34,197,94,0.38)";
-    ctx.lineWidth = arcW*0.35;
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, a1, a2, false);
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  // needle
-  const needlePct = opts.needlePct;
-  const aN = pctToAngle(needlePct);
-  const nx = cx + Math.cos(aN)*(r + arcW*0.25);
-  const ny = cy - Math.sin(aN)*(r + arcW*0.25);
-
-  ctx.save();
-  // needle line
-  ctx.strokeStyle = "rgba(255,255,255,0.92)";
-  ctx.lineWidth = 8;
-  ctx.beginPath();
-  ctx.moveTo(cx, cy);
-  ctx.lineTo(nx, ny);
-  ctx.stroke();
-
-  // knob
-  ctx.fillStyle = "rgba(255,255,255,0.92)";
-  ctx.beginPath();
-  ctx.arc(cx, cy, 16, 0, Math.PI*2);
-  ctx.fill();
-
-  // knob ring
-  ctx.strokeStyle = "rgba(0,0,0,0.25)";
-  ctx.lineWidth = 4;
-  ctx.beginPath();
-  ctx.arc(cx, cy, 16, 0, Math.PI*2);
-  ctx.stroke();
-  ctx.restore();
-
-  // subtle glow at needle tip
-  ctx.save();
-  ctx.fillStyle = "rgba(255,255,255,0.20)";
-  ctx.beginPath();
-  ctx.arc(nx, ny, 18, 0, Math.PI*2);
-  ctx.fill();
-  ctx.restore();
-
-  // secret marker (psychic only)
-  if(opts.showSecretMarker){
-    const aS = pctToAngle(opts.secret);
-    const sx = cx + Math.cos(aS)*(r - arcW*0.05);
-    const sy = cy - Math.sin(aS)*(r - arcW*0.05);
-
-    ctx.save();
-    ctx.fillStyle = "rgba(249,115,22,0.95)";
-    ctx.beginPath();
-    ctx.arc(sx, sy, 9, 0, Math.PI*2);
-    ctx.fill();
-    ctx.restore();
-  }
-
-  // caption
-  ctx.save();
-  ctx.fillStyle = "rgba(255,255,255,0.68)";
-  ctx.font = "800 22px Arial";
-  ctx.textAlign = "center";
-  ctx.fillText(opts.caption || "", cx, 56);
-  ctx.restore();
+function reveal(){
+ Object.keys(guesses).forEach(id=>{
+   const d=Math.abs(guesses[id]-secret);
+   const pts=d<zone/4?4:d<zone/2?3:d<zone*0.75?2:d<zone?1:0;
+   players[id].score+=pts;
+ });
+ psychicIndex=(psychicIndex+1)%players.length;
+ nextRound();
 }
 
-function renderPair(){
-  const [L,R,hint] = state.pair;
-  els.pair.innerHTML = `
-    <span class="pill">${L}</span>
-    <span class="vs">↔</span>
-    <span class="pill">${R}</span>
-  `;
-  els.pairHint.textContent = hint ? hint : "Le Psychic donne un indice : l’équipe place l’aiguille.";
-  els.leftLabelP.textContent = L;
-  els.rightLabelP.textContent = R;
-  els.leftLabelT.textContent = L;
-  els.rightLabelT.textContent = R;
+/* ===================== UI ===================== */
+const turnTitle=document.getElementById("turnTitle");
+const turnSub=document.getElementById("turnSub");
+const pairDiv=document.getElementById("pair");
+const btn=document.getElementById("actionBtn");
+const scoresDiv=document.getElementById("scores");
+const scoresPanel=document.getElementById("scoresPanel");
+
+function updateUI(){
+ pairDiv.innerHTML=PAIRS[rand(0,PAIRS.length-1)].map(t=>`<span class="pill">${t}</span>`).join("↔");
+
+ players.forEach((p,i)=>p.isPsychic=i===psychicIndex);
+
+ if(phase==="psychic"){
+   turnTitle.textContent="TOUR DU PSYCHIC";
+   turnSub.textContent=players[psychicIndex].name;
+   draw(secret,true,true);
+   btn.textContent="Passer à l'équipe";
+   btn.onclick=()=>{phase="team";updateUI();}
+ }
+
+ if(phase==="team"){
+   const p=players.find((_,i)=>i!==psychicIndex && !guesses[i]);
+   turnTitle.textContent="TOUR DE";
+   turnSub.textContent=p.name;
+   draw(50,false,false);
+   btn.textContent="Valider mon placement";
+   btn.onclick=()=>{
+     guesses[players.indexOf(p)]=50;
+     nextTeam();
+   }
+ }
+
+ if(phase==="reveal"){
+   turnTitle.textContent="RÉVÉLATION";
+   turnSub.textContent="Résultats";
+   draw(50,true,true);
+   btn.textContent="Manche suivante";
+   btn.onclick=reveal;
+
+   scoresPanel.classList.remove("hidden");
+   scoresDiv.innerHTML="";
+   players.forEach(p=>{
+     scoresDiv.innerHTML+=`<div class="scoreline"><b>${p.name}</b><span>${p.score}</span></div>`;
+   });
+ }
 }
 
-function renderAll(){
-  renderPair();
-
-  els.secretValue.textContent = state.secret;
-  els.zoneInfo.textContent = "Zone: " + state.zoneWidth;
-
-  // Psychic canvas: needle = secret, zone visible, secret marker visible
-  drawGauge(els.canvasPsychic, {
-    showZone: true,
-    showSecretMarker: true,
-    secret: state.secret,
-    zoneWidth: state.zoneWidth,
-    needlePct: state.secret,
-    caption: "Psychic"
-  });
-
-  // Team canvas: needle = guess, zone only if revealed
-  drawGauge(els.canvasTeam, {
-    showZone: state.revealed,
-    showSecretMarker: state.revealed,  // on montre le point secret après reveal
-    secret: state.secret,
-    zoneWidth: state.zoneWidth,
-    needlePct: state.guess,
-    caption: state.revealed ? "Révélation" : "Équipe"
-  });
-}
-
-/* Interaction équipe (drag/click demi-cercle) */
-let dragging = false;
-function setGuessFromPointer(canvas, ev){
-  const rect = canvas.getBoundingClientRect();
-  const x = clamp((ev.clientX - rect.left) / rect.width, 0, 1);
-  // On mappe x (0..1) -> pct (0..100) directement
-  const pct = Math.round(x * 100);
-  state.guess = pct;
-  els.guessValue.textContent = pct;
-  if(!state.revealed){
-    drawGauge(canvas, {
-      showZone:false,
-      showSecretMarker:false,
-      secret: state.secret,
-      zoneWidth: state.zoneWidth,
-      needlePct: state.guess,
-      caption:"Équipe"
-    });
-  } else {
-    renderAll();
-  }
-}
-
-els.canvasTeam.addEventListener("pointerdown", (e)=>{
-  dragging = true;
-  els.canvasTeam.setPointerCapture(e.pointerId);
-  setGuessFromPointer(els.canvasTeam, e);
-});
-els.canvasTeam.addEventListener("pointermove", (e)=>{
-  if(!dragging) return;
-  setGuessFromPointer(els.canvasTeam, e);
-});
-els.canvasTeam.addEventListener("pointerup", ()=>{
-  dragging = false;
-});
-els.canvasTeam.addEventListener("pointercancel", ()=>{
-  dragging = false;
-});
-
-/* Buttons */
-els.btnNew.onclick = ()=> newRound();
-els.btnSwitch.onclick = ()=> setMode(state.mode === "team" ? "psychic" : "team");
-
-els.btnReveal.onclick = ()=>{
-  state.revealed = true;
-  const pts = computePoints(state.secret, state.guess, state.zoneWidth);
-  els.points.textContent = pts + " / 4";
-  renderAll();
-};
-els.btnHide.onclick = ()=>{
-  state.revealed = false;
-  els.points.textContent = "—";
-  renderAll();
-};
-
-/* init */
-newRound();
-setMode("team");
+btn.onclick=startGame;
 </script>
 </body>
 </html>
