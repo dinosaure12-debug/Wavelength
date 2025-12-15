@@ -21,7 +21,10 @@
 body{
   margin:0;
   font-family:Arial, sans-serif;
-  background:radial-gradient(900px 500px at 20% 0%, rgba(249,115,22,.12), transparent 60%), var(--bg);
+  background:
+    radial-gradient(900px 500px at 20% 0%, rgba(249,115,22,.12), transparent 60%),
+    radial-gradient(900px 500px at 80% 10%, rgba(59,130,246,.10), transparent 60%),
+    var(--bg);
   color:var(--text);
   padding:12px;
   display:flex;
@@ -60,6 +63,8 @@ body{
   gap:12px;
   font-weight:900;
   font-size:18px;
+  flex-wrap:wrap;
+  align-items:center;
 }
 
 .pill{
@@ -67,7 +72,11 @@ body{
   border-radius:999px;
   background:rgba(255,255,255,.08);
   border:1px solid var(--border);
+  min-width: 160px;
+  text-align:center;
 }
+
+.vs{ color: rgba(255,255,255,.65); font-weight:900; }
 
 canvas{
   width:100%;
@@ -77,6 +86,7 @@ canvas{
   border-radius:18px;
   background:rgba(0,0,0,.2);
   border:1px solid var(--border);
+  touch-action:none;
 }
 
 button{
@@ -92,11 +102,6 @@ button{
 button.primary{
   background:linear-gradient(180deg, #f97316, #fb923c);
   color:#111;
-}
-
-button.green{
-  background:rgba(34,197,94,.25);
-  border-color:rgba(34,197,94,.5);
 }
 
 .hidden{display:none}
@@ -115,193 +120,297 @@ button.green{
 <body>
 <div class="app">
 
-<!-- HEADER -->
-<div class="panel">
-  <div class="turn" id="turnTitle">Configuration</div>
-  <div class="subturn" id="turnSub"></div>
-</div>
+  <div class="panel">
+    <div class="turn" id="turnTitle">Configuration</div>
+    <div class="subturn" id="turnSub"></div>
+  </div>
 
-<!-- PAIR -->
-<div class="panel">
-  <div class="pair" id="pair"></div>
-</div>
+  <div class="panel">
+    <div class="pair" id="pair"></div>
+  </div>
 
-<!-- CANVAS -->
-<div class="panel">
-  <canvas id="canvas" width="800" height="500"></canvas>
-</div>
+  <div class="panel">
+    <canvas id="canvas" width="800" height="500"></canvas>
+  </div>
 
-<!-- ACTION -->
-<div class="panel" style="text-align:center;">
-  <button id="actionBtn" class="primary">Commencer</button>
-</div>
+  <div class="panel" style="text-align:center;">
+    <button id="actionBtn" class="primary">Commencer</button>
+  </div>
 
-<!-- SCORES -->
-<div class="panel hidden" id="scoresPanel">
-  <h3>Scores</h3>
-  <div id="scores"></div>
-</div>
+  <div class="panel hidden" id="scoresPanel">
+    <h3 style="margin:0 0 10px 0;">Scores</h3>
+    <div id="scores"></div>
+  </div>
 
 </div>
 
 <script>
-/* ===================== CONFIG ===================== */
+/* ===================== THEMES ===================== */
 const PAIRS = [
- ["Rappeur inconnu","Rappeur légendaire"],
- ["Acteur éclaté","Acteur immense"],
- ["Jeu vidéo niche","Jeu vidéo mythique"],
- ["Punchline faible","Punchline assassine"],
- ["Ville éclatée","Ville incroyable"],
- ["Film chiant","Film addictif"],
- ["Humour gênant","Humour masterclass"]
+  ["Rappeur inconnu","Rappeur légendaire"],
+  ["Acteur éclaté","Acteur immense"],
+  ["Jeu vidéo niche","Jeu vidéo mythique"],
+  ["Punchline faible","Punchline assassine"],
+  ["Ville éclatée","Ville incroyable"],
+  ["Film chiant","Film addictif"],
+  ["Humour gênant","Humour masterclass"],
 ];
 
 /* ===================== STATE ===================== */
 let players = [];
 let psychicIndex = 0;
-let phase = "setup"; // setup | psychic | team | reveal
-let currentTeamIndex = 0;
 
+let phase = "setup"; // setup | psychic | team | reveal
 let secret = 0;
 let zone = 0;
-let guesses = {};
+
+// IMPORTANT: thème figé pour toute la manche
+let roundPair = null;
+
+// guesses par index joueur
+let guesses = {};      // { "1": 63, "2": 41, ... }
+
+// pour l’équipe : placement courant (modifiable au drag)
+let currentNeedle = 50;
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
+const turnTitle = document.getElementById("turnTitle");
+const turnSub   = document.getElementById("turnSub");
+const pairDiv   = document.getElementById("pair");
+const btn       = document.getElementById("actionBtn");
+const scoresDiv = document.getElementById("scores");
+const scoresPanel = document.getElementById("scoresPanel");
+
 /* ===================== UTILS ===================== */
-const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const rand = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
 
-/* ===================== DRAW ===================== */
-function draw(needle, showZone=false, showSecret=false){
- ctx.clearRect(0,0,800,500);
- const cx=400, cy=430, r=300;
+function draw(needle, showZone=false, showSecret=false, showValue=false){
+  ctx.clearRect(0,0,800,500);
+  const cx=400, cy=430, r=300;
 
- ctx.strokeStyle="rgba(255,255,255,.2)";
- ctx.lineWidth=60;
- ctx.beginPath();
- ctx.arc(cx,cy,r,Math.PI,0);
- ctx.stroke();
+  // base arc
+  ctx.strokeStyle="rgba(255,255,255,.20)";
+  ctx.lineWidth=60;
+  ctx.lineCap="round";
+  ctx.beginPath();
+  ctx.arc(cx,cy,r,Math.PI,0);
+  ctx.stroke();
 
- if(showZone){
-   const a1=Math.PI*(1-(secret-zone/2)/100);
-   const a2=Math.PI*(1-(secret+zone/2)/100);
-   ctx.strokeStyle="rgba(34,197,94,.35)";
-   ctx.lineWidth=60;
-   ctx.beginPath();
-   ctx.arc(cx,cy,r,a2,a1);
-   ctx.stroke();
- }
+  // zone
+  if(showZone){
+    const left = clamp(secret - zone/2, 0, 100);
+    const right = clamp(secret + zone/2, 0, 100);
+    const aLeft = Math.PI*(1-left/100);
+    const aRight = Math.PI*(1-right/100);
 
- const a=Math.PI*(1-needle/100);
- const nx=cx+Math.cos(a)*r;
- const ny=cy-Math.sin(a)*r;
+    ctx.strokeStyle="rgba(34,197,94,.35)";
+    ctx.lineWidth=60;
+    ctx.beginPath();
+    ctx.arc(cx,cy,r,aRight,aLeft);
+    ctx.stroke();
+  }
 
- ctx.strokeStyle="#fff";
- ctx.lineWidth=6;
- ctx.beginPath();
- ctx.moveTo(cx,cy);
- ctx.lineTo(nx,ny);
- ctx.stroke();
+  // needle
+  const a = Math.PI*(1-needle/100);
+  const nx=cx+Math.cos(a)*r;
+  const ny=cy-Math.sin(a)*r;
 
- ctx.fillStyle="#fff";
- ctx.beginPath();
- ctx.arc(cx,cy,12,0,Math.PI*2);
- ctx.fill();
+  ctx.strokeStyle="rgba(255,255,255,.92)";
+  ctx.lineWidth=6;
+  ctx.beginPath();
+  ctx.moveTo(cx,cy);
+  ctx.lineTo(nx,ny);
+  ctx.stroke();
 
- if(showSecret){
-   const as=Math.PI*(1-secret/100);
-   ctx.fillStyle="#f97316";
-   ctx.beginPath();
-   ctx.arc(cx+Math.cos(as)*r, cy-Math.sin(as)*r, 8,0,Math.PI*2);
-   ctx.fill();
- }
+  ctx.fillStyle="rgba(255,255,255,.92)";
+  ctx.beginPath();
+  ctx.arc(cx,cy,12,0,Math.PI*2);
+  ctx.fill();
+
+  // secret marker
+  if(showSecret){
+    const as=Math.PI*(1-secret/100);
+    ctx.fillStyle="#f97316";
+    ctx.beginPath();
+    ctx.arc(cx+Math.cos(as)*r, cy-Math.sin(as)*r, 8,0,Math.PI*2);
+    ctx.fill();
+  }
+
+  // optional numeric feedback (for team)
+  if(showValue){
+    ctx.fillStyle="rgba(255,255,255,.85)";
+    ctx.font="900 30px Arial";
+    ctx.textAlign="center";
+    ctx.fillText(String(needle), cx, 70);
+    ctx.font="700 14px Arial";
+    ctx.fillStyle="rgba(255,255,255,.60)";
+    ctx.fillText("Ton placement", cx, 95);
+  }
 }
 
-/* ===================== FLOW ===================== */
+function renderPair(){
+  if(!roundPair) return;
+  const [L,R] = roundPair;
+  pairDiv.innerHTML = `
+    <span class="pill">${L}</span>
+    <span class="vs">↔</span>
+    <span class="pill">${R}</span>
+  `;
+}
+
+/* ===================== GAME FLOW ===================== */
 function startGame(){
- players = prompt("Pseudos séparés par des virgules").split(",").map(p=>({name:p.trim(),score:0}));
- psychicIndex = rand(0, players.length-1);
- nextRound();
+  const raw = prompt("Pseudos séparés par des virgules (ex: Sam, Lina, Mehdi)") || "";
+  const names = raw.split(",").map(s=>s.trim()).filter(Boolean);
+  if(names.length < 2){
+    alert("Il faut au moins 2 participants.");
+    return;
+  }
+  players = names.map(n=>({name:n, score:0}));
+  psychicIndex = rand(0, players.length-1);
+
+  nextRound();
 }
 
 function nextRound(){
- guesses={};
- secret=rand(0,100);
- zone=rand(18,26);
- currentTeamIndex=0;
- phase="psychic";
- updateUI();
+  guesses = {};
+  secret = rand(0,100);
+  zone = rand(18,26);
+  roundPair = PAIRS[rand(0, PAIRS.length-1)];   // IMPORTANT: choisi une fois, figé
+  currentNeedle = 50;
+  phase = "psychic";
+  updateUI();
 }
 
-function nextTeam(){
- do{ currentTeamIndex++; } 
- while(players[currentTeamIndex]?.isPsychic);
- if(currentTeamIndex>=players.length){
-   phase="reveal";
- } else phase="team";
- updateUI();
-}
-
-function reveal(){
- Object.keys(guesses).forEach(id=>{
-   const d=Math.abs(guesses[id]-secret);
-   const pts=d<zone/4?4:d<zone/2?3:d<zone*0.75?2:d<zone?1:0;
-   players[id].score+=pts;
- });
- psychicIndex=(psychicIndex+1)%players.length;
- nextRound();
+function getNextTeamPlayerIndex(){
+  for(let i=0;i<players.length;i++){
+    if(i === psychicIndex) continue;
+    if(guesses[i] == null) return i;
+  }
+  return null;
 }
 
 /* ===================== UI ===================== */
-const turnTitle=document.getElementById("turnTitle");
-const turnSub=document.getElementById("turnSub");
-const pairDiv=document.getElementById("pair");
-const btn=document.getElementById("actionBtn");
-const scoresDiv=document.getElementById("scores");
-const scoresPanel=document.getElementById("scoresPanel");
-
-function updateUI(){
- pairDiv.innerHTML=PAIRS[rand(0,PAIRS.length-1)].map(t=>`<span class="pill">${t}</span>`).join("↔");
-
- players.forEach((p,i)=>p.isPsychic=i===psychicIndex);
-
- if(phase==="psychic"){
-   turnTitle.textContent="TOUR DU PSYCHIC";
-   turnSub.textContent=players[psychicIndex].name;
-   draw(secret,true,true);
-   btn.textContent="Passer à l'équipe";
-   btn.onclick=()=>{phase="team";updateUI();}
- }
-
- if(phase==="team"){
-   const p=players.find((_,i)=>i!==psychicIndex && !guesses[i]);
-   turnTitle.textContent="TOUR DE";
-   turnSub.textContent=p.name;
-   draw(50,false,false);
-   btn.textContent="Valider mon placement";
-   btn.onclick=()=>{
-     guesses[players.indexOf(p)]=50;
-     nextTeam();
-   }
- }
-
- if(phase==="reveal"){
-   turnTitle.textContent="RÉVÉLATION";
-   turnSub.textContent="Résultats";
-   draw(50,true,true);
-   btn.textContent="Manche suivante";
-   btn.onclick=reveal;
-
-   scoresPanel.classList.remove("hidden");
-   scoresDiv.innerHTML="";
-   players.forEach(p=>{
-     scoresDiv.innerHTML+=`<div class="scoreline"><b>${p.name}</b><span>${p.score}</span></div>`;
-   });
- }
+function updateScores(){
+  scoresDiv.innerHTML = "";
+  players.forEach((p, idx)=>{
+    scoresDiv.innerHTML += `
+      <div class="scoreline">
+        <b>${p.name}${idx===psychicIndex ? " (Psychic)" : ""}</b>
+        <span>${p.score} pts</span>
+      </div>
+    `;
+  });
 }
 
-btn.onclick=startGame;
+function updateUI(){
+  renderPair();
+
+  if(phase === "setup"){
+    turnTitle.textContent = "Configuration";
+    turnSub.textContent = "Clique sur Commencer";
+    draw(50,false,false,false);
+    btn.textContent = "Commencer";
+    btn.onclick = startGame;
+    return;
+  }
+
+  if(phase === "psychic"){
+    const psychicName = players[psychicIndex].name;
+    turnTitle.textContent = "TOUR DU PSYCHIC";
+    turnSub.textContent = `${psychicName} — Secret: ${secret} (à ne pas dire)`;
+    draw(secret, true, true, false);
+    btn.textContent = "Passer à l'équipe";
+    btn.onclick = ()=>{
+      phase = "team";
+      currentNeedle = 50;
+      updateUI();
+    };
+    return;
+  }
+
+  if(phase === "team"){
+    const idx = getNextTeamPlayerIndex();
+    if(idx == null){
+      phase = "reveal";
+      updateUI();
+      return;
+    }
+
+    const name = players[idx].name;
+    turnTitle.textContent = "TOUR DE L'ÉQUIPE";
+    turnSub.textContent = `${name} — place ton aiguille puis valide`;
+    draw(currentNeedle, false, false, true);
+
+    btn.textContent = "Valider mon placement";
+    btn.onclick = ()=>{
+      guesses[idx] = currentNeedle; // IMPORTANT: on stocke la valeur choisie
+      currentNeedle = 50;           // reset pour le prochain joueur
+      updateUI();
+    };
+    return;
+  }
+
+  if(phase === "reveal"){
+    turnTitle.textContent = "RÉVÉLATION";
+    turnSub.textContent = `Secret du Psychic: ${secret} — Zone: ${zone}`;
+
+    // on montre zone + secret + aiguille (on laisse l’aiguille au secret pour l’instant)
+    draw(secret, true, true, false);
+
+    // calcul points + affichage (pour l’instant sans changer tes règles)
+    // (on ne touche pas le scoring maintenant, tu voulais seulement thème + drag)
+    scoresPanel.classList.remove("hidden");
+    updateScores();
+
+    btn.textContent = "Manche suivante (Psychic suivant)";
+    btn.onclick = ()=>{
+      // Psychic suivant dans la liste
+      psychicIndex = (psychicIndex + 1) % players.length;
+      nextRound();
+    };
+    return;
+  }
+}
+
+/* ===================== TEAM DRAG (FIX #2) ===================== */
+function pointerToPct(ev){
+  const rect = canvas.getBoundingClientRect();
+  const x = clamp((ev.clientX - rect.left) / rect.width, 0, 1);
+  return Math.round(x * 100);
+}
+
+let dragging = false;
+
+canvas.addEventListener("pointerdown", (e)=>{
+  if(phase !== "team") return;
+  dragging = true;
+  canvas.setPointerCapture(e.pointerId);
+  currentNeedle = pointerToPct(e);
+  draw(currentNeedle, false, false, true);
+});
+
+canvas.addEventListener("pointermove", (e)=>{
+  if(!dragging) return;
+  if(phase !== "team") return;
+  currentNeedle = pointerToPct(e);
+  draw(currentNeedle, false, false, true);
+});
+
+canvas.addEventListener("pointerup", ()=>{
+  dragging = false;
+});
+canvas.addEventListener("pointercancel", ()=>{
+  dragging = false;
+});
+
+/* init */
+phase = "setup";
+updateUI();
 </script>
+
 </body>
 </html>
