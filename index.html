@@ -503,7 +503,40 @@ function pctToAngle(pct){
   // 0% = gauche (PI), 100% = droite (0)
   return Math.PI - (pct/100) * Math.PI;
 }
+function drawArcSegment(fromPct, toPct, color, cx, cy, r){
+  const a = clamp(fromPct, 0, 100);
+  const b = clamp(toPct, 0, 100);
 
+  // Si segment vide
+  if(b <= a) return;
+
+  const aStart = pctToAngle(a); // angle "gauche" (plus grand)
+  const aEnd   = pctToAngle(b); // angle "droite" (plus petit)
+
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 20;     // anneau fin
+  ctx.lineCap = "butt";
+  ctx.beginPath();
+  ctx.arc(cx, cy, r - 20, aStart, aEnd, false);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawScoringBands(cx, cy, r){
+  const s = secret;
+
+  // Vert : [s-3 ; s+3]
+  drawArcSegment(s - Z_GREEN, s + Z_GREEN, "rgba(34,197,94,.70)", cx, cy, r);
+
+  // Orange : (s-5 ; s-3] et [s+3 ; s+5)
+  drawArcSegment(s - Z_ORANGE, s - Z_GREEN, "rgba(245,158,11,.70)", cx, cy, r);
+  drawArcSegment(s + Z_GREEN,  s + Z_ORANGE,"rgba(245,158,11,.70)", cx, cy, r);
+
+  // Rouge : (s-8 ; s-5] et [s+5 ; s+8)
+  drawArcSegment(s - Z_RED,    s - Z_ORANGE,"rgba(239,68,68,.70)", cx, cy, r);
+  drawArcSegment(s + Z_ORANGE, s + Z_RED,   "rgba(239,68,68,.70)", cx, cy, r);
+}
 function drawBaseArc(cx,cy,r){
   ctx.save();
   ctx.strokeStyle="rgba(255,255,255,.18)";
@@ -557,11 +590,8 @@ function drawDial({mode}){
   drawBaseArc(cx,cy,r);
 
   if(mode === "reveal"){
-    // zones (du plus large au plus précis, pour lisibilité)
-    drawZone(Z_RED,   "rgba(239,68,68,.30)", cx,cy,r);
-    drawZone(Z_ORANGE,"rgba(245,158,11,.32)", cx,cy,r);
-    drawZone(Z_GREEN, "rgba(34,197,94,.38)", cx,cy,r);
-  }
+  drawScoringBands(cx, cy, r);
+}
 
   // Center hub
   ctx.save();
@@ -825,7 +855,7 @@ function ensurePlayersCount(n){
 }
 
 function hydrateSetupUI(){
-  const n = players.length >= 2 ? players.length : Number(playerCount.value || 3);
+  const n = Number(playerCount.value || 3);
   playerCount.value = String(n);
   ensurePlayersCount(n);
 
