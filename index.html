@@ -324,9 +324,10 @@ select:focus, input[type="text"]:focus{
   </div>
 
   <div class="panel controls">
-    <button id="btnSetup" class="ghost">Participants</button>
-    <button id="actionBtn" class="primary">Nouvelle partie</button>
-  </div>
+  <button id="btnSetup" class="ghost">Participants</button>
+  <button id="btnSettings" class="ghost">Paramètres</button>
+  <button id="actionBtn" class="primary">Nouvelle partie</button>
+</div>
 
   <div class="panel" id="scoresPanel">
     <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
@@ -348,6 +349,26 @@ select:focus, input[type="text"]:focus{
       <button id="btnCloseSetup" class="ghost">Fermer</button>
     </div>
 
+    <!-- Settings overlay -->
+<div id="settingsOverlay" class="overlay">
+  <div class="modal">
+    <div class="row" style="justify-content:space-between;">
+      <div>
+        <h2>Paramètres</h2>
+        <div class="small">Choisis les packs de catégories utilisés pour la manche.</div>
+      </div>
+      <button id="btnCloseSettings" class="ghost">Fermer</button>
+    </div>
+
+    <div id="packsList" class="playersList"></div>
+
+    <div class="row" style="justify-content:flex-end;">
+      <button id="btnSelectAll" class="ghost">Tout cocher</button>
+      <button id="btnSelectNone" class="ghost">Tout décocher</button>
+      <button id="btnSaveSettings" class="primary">Enregistrer</button>
+    </div>
+  </div>
+</div>
     <div class="row">
       <div class="field">
         <label>Nombre de participants</label>
@@ -372,17 +393,26 @@ select:focus, input[type="text"]:focus{
 
 <script>
 /* ===================== THEMES ===================== */
-const PAIRS = [
-  ["Rappeur inconnu","Rappeur légendaire"],
-  ["Acteur éclaté","Acteur immense"],
-  ["Jeu vidéo niche","Jeu vidéo mythique"],
-  ["Punchline faible","Punchline assassine"],
-  ["Ville éclatée","Ville incroyable"],
-  ["Film chiant","Film addictif"],
-  ["Humour gênant","Humour masterclass"],
-  ["Feat inutile","Feat qui détruit le track"],
-  ["Série oubliable","Série culte"],
-];
+<!-- Settings overlay -->
+<div id="settingsOverlay" class="overlay">
+  <div class="modal">
+    <div class="row" style="justify-content:space-between;">
+      <div>
+        <h2>Paramètres</h2>
+        <div class="small">Choisis les packs de catégories utilisés pour la manche.</div>
+      </div>
+      <button id="btnCloseSettings" class="ghost">Fermer</button>
+    </div>
+
+    <div id="packsList" class="playersList"></div>
+
+    <div class="row" style="justify-content:flex-end;">
+      <button id="btnSelectAll" class="ghost">Tout cocher</button>
+      <button id="btnSelectNone" class="ghost">Tout décocher</button>
+      <button id="btnSaveSettings" class="primary">Enregistrer</button>
+    </div>
+  </div>
+</div>
 
 /* ===================== COLORS ===================== */
 const COLOR_CHOICES = [
@@ -416,7 +446,7 @@ let players = []; // {id,name,color,score}
 let psychicIndex = 0;
 
 let phase = "setup"; // setup | psychic | team | reveal
-let roundPair = null;
+let currentCategory = null;
 
 let secret = 0;
 let guesses = {};   // by playerId: { [id]: value }
@@ -451,6 +481,14 @@ const playerCount = document.getElementById("playerCount");
 const playersList = document.getElementById("playersList");
 const btnRandomPsychic = document.getElementById("btnRandomPsychic");
 const btnStart = document.getElementById("btnStart");
+const btnSettings = document.getElementById("btnSettings");
+const settingsOverlay = document.getElementById("settingsOverlay");
+const btnCloseSettings = document.getElementById("btnCloseSettings");
+const packsList = document.getElementById("packsList");
+const btnSelectAll = document.getElementById("btnSelectAll");
+const btnSelectNone = document.getElementById("btnSelectNone");
+const btnSaveSettings = document.getElementById("btnSaveSettings");
+
 
 /* ===================== UTILS ===================== */
 const rand = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
@@ -480,14 +518,17 @@ function loadPlayers(){
   return false;
 }
 
-function pickPairOnce(){
-  roundPair = PAIRS[rand(0, PAIRS.length-1)];
+function pickCategoryOnce(){
+  currentCategory = pickCategory();
 }
 function renderPair(){
-  if(!roundPair){
-    pairDiv.innerHTML = `<span class="pill">—</span><span class="vs">↔</span><span class="pill">—</span>`;
+  if(!currentCategory){
+    pairDiv.innerHTML = `<span class="pill">—</span>`;
     return;
   }
+  pairDiv.innerHTML = `<span class="pill">${currentCategory}</span>`;
+}
+
   const [L,R] = roundPair;
   pairDiv.innerHTML = `
     <span class="pill">${L}</span>
@@ -721,9 +762,10 @@ function updateUI(){
         return;
       }
       // Psychic aléatoire au tout début si première manche
-      if(!roundPair){
-        psychicIndex = rand(0, players.length-1);
-      }
+      if(!currentCategory){
+  psychicIndex = rand(0, players.length-1);
+}
+
       nextRound();
     };
     return;
@@ -926,9 +968,10 @@ btnStart.onclick = ()=>{
   });
 
   // Psychic aléatoire au démarrage de partie (si on repart de zéro)
-  if(!roundPair){
-    psychicIndex = rand(0, players.length-1);
-  }
+if(!currentCategory){
+  psychicIndex = rand(0, players.length-1);
+}
+
 
   savePlayers();
   closeSetup();
@@ -941,6 +984,66 @@ btnResetScores.onclick = ()=>{
   players.forEach(p=>p.score = 0);
   savePlayers();
   renderScores();
+};
+function openSettings(){
+  settingsOverlay.classList.add("show");
+  renderSettingsUI();
+}
+function closeSettings(){
+  settingsOverlay.classList.remove("show");
+}
+
+function renderSettingsUI(){
+  packsList.innerHTML = "";
+
+  for(const [key, pack] of Object.entries(CATEGORY_PACKS)){
+    const row = document.createElement("div");
+    row.className = "scoreline";
+    row.style.justifyContent = "space-between";
+
+    const left = document.createElement("div");
+    left.className = "scoreLeft";
+    left.innerHTML = `<span class="nameText">${pack.label}</span>`;
+
+    const right = document.createElement("div");
+    right.style.display = "flex";
+    right.style.alignItems = "center";
+    right.style.gap = "10px";
+
+    const count = document.createElement("span");
+    count.className = "badge";
+    count.textContent = `${pack.items.length} mots`;
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = !!settings.packsEnabled[key];
+    checkbox.onchange = ()=>{ settings.packsEnabled[key] = checkbox.checked; };
+
+    right.appendChild(count);
+    right.appendChild(checkbox);
+
+    row.appendChild(left);
+    row.appendChild(right);
+    packsList.appendChild(row);
+  }
+}
+
+btnSettings.onclick = openSettings;
+btnCloseSettings.onclick = closeSettings;
+
+btnSelectAll.onclick = ()=>{
+  for(const k of Object.keys(CATEGORY_PACKS)) settings.packsEnabled[k] = true;
+  renderSettingsUI();
+};
+
+btnSelectNone.onclick = ()=>{
+  for(const k of Object.keys(CATEGORY_PACKS)) settings.packsEnabled[k] = false;
+  renderSettingsUI();
+};
+
+btnSaveSettings.onclick = ()=>{
+  saveSettings();
+  closeSettings();
 };
 
 /* ===================== INIT ===================== */
@@ -955,7 +1058,8 @@ if(!loadPlayers()){
 }
 
 phase = "setup";
-roundPair = null;
+currentCategory = null;
+loadSettings();
 updateUI();
 </script>
 
