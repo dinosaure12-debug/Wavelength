@@ -1280,6 +1280,28 @@ phase = "setup";
 currentCategory = null;
 updateUI();
 </script>
+<!-- Firebase SDK (Web, sans npm) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
+  const firebaseConfig = {
+    apiKey: "AIzaSyB2bxTrr3nT_p20hEp7j2DFR3ptWtDPXP4",
+    authDomain: "wavelength-3728d.firebaseapp.com",
+    projectId: "wavelength-3728d",
+    storageBucket: "wavelength-3728d.firebasestorage.app",
+    messagingSenderId: "1045281881502",
+    appId: "1:1045281881502:web:fafcfa708554d5564e6a8f"
+  };
+
+  // Initialisation Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Rendre Firestore accessible partout dans ton jeu
+  window.db = db;
+
+  console.log("🔥 Firebase connecté");
+</script>
 </body>
 </html>
