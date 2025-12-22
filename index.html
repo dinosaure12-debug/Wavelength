@@ -418,31 +418,132 @@ select:focus, input[type="text"]:focus{
 /* ===================== CATEGORY PACKS ===================== */
 const CATEGORY_PACKS = {
   table: {
-    label: "Autour de la table (adjectifs)",
-    items: ["radin", "drôle", "susceptible", "organisé", "retardataire", "chill",
-            "compétitif", "têtu", "diplomate", " bordélique", "chanceux", "malchanceux"]
+    label: "Autour de la table",
+    items: [
+      "quelqu’un de radin",
+      "quelqu’un de drôle",
+      "quelqu’un de susceptible",
+      "quelqu’un d’organisé",
+      "quelqu’un de retardataire",
+      "quelqu’un de chill",
+      "quelqu’un de compétitif",
+      "quelqu’un de têtu",
+      "quelqu’un de diplomate",
+      "quelqu’un de bordélique",
+      "quelqu’un de chanceux",
+      "quelqu’un de malchanceux"
+    ]
   },
+
   objets: {
     label: "Objets",
-    items: ["chaussure", "voiture", "console" , "Moyen de locomotion" , "arme"]
+    items: [
+      "un objet de cuisine",
+      "un gadget",
+      "un truc qui fait du bruit",
+      "un objet de daron",
+      "une chaussure",
+      "une voiture",
+      "une console",
+      "un moyen de locomotion",
+      "un objet dangereux"
+    ]
   },
+
   bouffe: {
     label: "Bouffe",
-    items: ["charcuterie pour une raclette","fromage", "burger", "plat", "dessert", "boisson", "viennoiserie"]
+    items: [
+      "un truc pour une raclette",
+      "un fromage",
+      "un burger",
+      "un plat",
+      "un dessert",
+      "une boisson",
+      "une viennoiserie",
+      "un truc de fête"
+    ]
   },
+
   pop: {
     label: "Pop culture",
-    items: ["rappeur", "acteur", "mème", "jeu vidéo", "streamer", "série", "anime", "super-héros", "clip", "banger", "blockbuster", "sportifs", "auteurs-ice" , "politique" , "influenceur"]
+    items: [
+      "un rappeur",
+      "un acteur",
+      "un mème",
+      "un jeu vidéo",
+      "un streamer",
+      "une série",
+      "un anime",
+      "un super-héros",
+      "un clip",
+      "un banger",
+      "un blockbuster",
+      "un sportif",
+      "un auteur",
+      "un politique",
+      "un influenceur"
+    ]
   },
+
   lieux: {
     label: "Lieux",
-    items: ["aéroport", "plage", "camping", "centre commercial", "métro", "stade", "boîte de nuit", "Pays (attention ça peut être raciste)"]
+    items: [
+      "un aéroport",
+      "une plage",
+      "un camping",
+      "un centre commercial",
+      "un métro",
+      "un stade",
+      "une boîte de nuit",
+      "un pays"
+    ]
   },
+
   marques: {
     label: "Marques",
-    items: ["Marque de street-wear", "Marque de téléphone", "marque de voiture", "studio de jeu vidéo", "Marque de la tech", "marque de bières"]
+    items: [
+      "une marque de streetwear",
+      "une marque de téléphone",
+      "une marque de voiture",
+      "un studio de jeu vidéo",
+      "une marque tech",
+      "une marque de boisson"
+    ]
+  },
+
+  metiers: {
+    label: "Jobs et vie adulte",
+    items: [
+      "un métier",
+      "un type de collègue",
+      "un type de client",
+      "un type de patron",
+      "une paye"
+    ]
+  },
+
+  internet: {
+    label: "Réseaux sociaux et internet",
+    items: [
+      "une appli",
+      "un réseau social",
+      "une trend",
+      "une notification",
+      "une vidéo YouTube"
+    ]
+  },
+
+  delires: {
+    label: "Délires et situations absurdes",
+    items: [
+      "un super-pouvoir",
+      "une catastrophe",
+      "une peur",
+      "un truc illégal"
+    ]
   }
 };
+
 
 /* ===================== COLORS ===================== */
 const COLOR_CHOICES = [
@@ -625,49 +726,47 @@ function pctToAngle(pct){
   return Math.PI - (pct/100) * Math.PI;
 }
 
-function drawBaseArc(cx,cy,r){
-  ctx.save();
-  ctx.strokeStyle="rgba(255,255,255,.18)";
-  ctx.lineWidth=60;
-  ctx.lineCap="round";
-  ctx.beginPath();
-  ctx.arc(cx,cy,r,Math.PI,0,false);
-  ctx.stroke();
-  ctx.restore();
-}
-
-function drawArcBand(cx,cy,r, centerPct, radiusPct, color, lw){
+/**
+ * Trace une bande colorée autour d'un centerPct, uniquement sur le demi-cercle du haut.
+ * On force le sens (startAngle > endAngle) et on clip pour empêcher toute fuite en bas.
+ */
+function drawArcBand(cx, cy, r, centerPct, radiusPct, color, lw){
   const leftPct  = clamp(centerPct - radiusPct, 0, 100);
   const rightPct = clamp(centerPct + radiusPct, 0, 100);
 
   const aLeft  = pctToAngle(leftPct);   // proche de PI
   const aRight = pctToAngle(rightPct);  // proche de 0
 
-  // IMPORTANT: on trace TOUJOURS du plus petit angle vers le plus grand
-  // pour éviter le "wrap" qui colorie presque tout le cercle.
-  const a1 = Math.min(aLeft, aRight);
-  const a2 = Math.max(aLeft, aRight);
-
   ctx.save();
+
+  // Clip "haut de canvas" (sécurité) : interdit de dessiner sous le centre (cy)
+  ctx.beginPath();
+  ctx.rect(0, 0, canvas.width, cy); // seulement la zone au-dessus du centre
+  ctx.clip();
+
   ctx.strokeStyle = color;
   ctx.lineWidth = lw;
   ctx.lineCap = "butt";
+
   ctx.beginPath();
-  ctx.arc(cx, cy, r, a1, a2, false);
+  // IMPORTANT: startAngle = aLeft (plus grand), endAngle = aRight (plus petit)
+  // => ça suit le demi-cercle du haut (même logique que arc(Math.PI,0,false))
+  ctx.arc(cx, cy, r, aLeft, aRight, false);
   ctx.stroke();
+
   ctx.restore();
 }
 
-
-function drawScoringBands(cx,cy,r){
+function drawScoringBands(cx, cy, r){
   const ringR = r - 18;
   const lw = 40;
 
-  // Dessin du plus large au plus précis
-  drawArcBand(cx,cy,ringR, secret, Z_RED,    "rgba(239,68,68,.28)",  lw);
-  drawArcBand(cx,cy,ringR, secret, Z_ORANGE, "rgba(245,158,11,.32)", lw);
-  drawArcBand(cx,cy,ringR, secret, Z_GREEN,  "rgba(34,197,94,.36)",  lw);
+  // Du plus large au plus précis (rouge -> orange -> vert)
+  drawArcBand(cx, cy, ringR, secret, Z_RED,    "rgba(239,68,68,.28)",  lw);
+  drawArcBand(cx, cy, ringR, secret, Z_ORANGE, "rgba(245,158,11,.32)", lw);
+  drawArcBand(cx, cy, ringR, secret, Z_GREEN,  "rgba(34,197,94,.36)",  lw);
 }
+
 
 function drawNeedle(pct, color, width, cx,cy,r){
   const a = pctToAngle(pct);
