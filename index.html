@@ -297,11 +297,11 @@ select:focus, input[type="text"]:focus{
   <div class="panel">
     <div class="pair" id="pair"></div>
   </div>
-  
-<div id="errBox" class="panel hidden"
-     style="border:2px solid rgba(255,0,0,.5); background:rgba(255,0,0,.08); color:#fff;">
-  <b>Erreur JS</b>
-</div>
+
+  <div id="errBox" class="panel hidden"
+       style="border:2px solid rgba(255,0,0,.5); background:rgba(255,0,0,.08); color:#fff;">
+    <b>Erreur JS</b>
+  </div>
 
   <div class="panel">
     <canvas id="canvas" width="900" height="520"></canvas>
@@ -461,7 +461,6 @@ const CATEGORY_PACKS = {
       "quelqu’un de malchanceux"
     ]
   },
-
   objets: {
     label: "Objets",
     items: [
@@ -476,7 +475,6 @@ const CATEGORY_PACKS = {
       "un objet dangereux"
     ]
   },
-
   bouffe: {
     label: "Bouffe",
     items: [
@@ -490,7 +488,6 @@ const CATEGORY_PACKS = {
       "un truc de fête"
     ]
   },
-
   pop: {
     label: "Pop culture",
     items: [
@@ -511,7 +508,6 @@ const CATEGORY_PACKS = {
       "un influenceur"
     ]
   },
-
   lieux: {
     label: "Lieux",
     items: [
@@ -525,7 +521,6 @@ const CATEGORY_PACKS = {
       "un pays"
     ]
   },
-
   marques: {
     label: "Marques",
     items: [
@@ -537,7 +532,6 @@ const CATEGORY_PACKS = {
       "une marque de boisson"
     ]
   },
-
   metiers: {
     label: "Jobs et vie adulte",
     items: [
@@ -548,7 +542,6 @@ const CATEGORY_PACKS = {
       "une paye"
     ]
   },
-
   internet: {
     label: "Réseaux sociaux et internet",
     items: [
@@ -559,7 +552,6 @@ const CATEGORY_PACKS = {
       "une vidéo YouTube"
     ]
   },
-
   delires: {
     label: "Délires et situations absurdes",
     items: [
@@ -570,7 +562,6 @@ const CATEGORY_PACKS = {
     ]
   }
 };
-
 
 /* ===================== COLORS ===================== */
 const COLOR_CHOICES = [
@@ -700,7 +691,6 @@ function loadSettings(){
   try{
     const raw = localStorage.getItem(SETTINGS_KEY);
     if(!raw) {
-      // default: tous cochés
       settings.packsEnabled = Object.fromEntries(Object.keys(CATEGORY_PACKS).map(k=>[k,true]));
       return;
     }
@@ -708,7 +698,6 @@ function loadSettings(){
     if(typeof data.pointsToWin === "number") settings.pointsToWin = data.pointsToWin;
     if(data.packsEnabled && typeof data.packsEnabled === "object") settings.packsEnabled = data.packsEnabled;
 
-    // garantir toutes les clés
     for(const k of Object.keys(CATEGORY_PACKS)){
       if(settings.packsEnabled[k] == null) settings.packsEnabled[k] = true;
     }
@@ -723,7 +712,6 @@ function enabledItems(){
   for(const k of keys){
     list.push(...CATEGORY_PACKS[k].items);
   }
-  // fallback si tout décoché
   if(list.length === 0){
     for(const k of Object.keys(CATEGORY_PACKS)) list.push(...CATEGORY_PACKS[k].items);
   }
@@ -734,7 +722,6 @@ function pickCategory(){
   const items = enabledItems();
   return items[rand(0, items.length-1)];
 }
-
 function pickCategoryOnce(){
   currentCategory = pickCategory();
 }
@@ -748,29 +735,49 @@ function renderPair(){
 }
 
 /* ===================== DRAW ===================== */
-function pctToAngle(pct){
+/**
+ * IMPORTANT:
+ * - Les AIGUILLES: on veut visuellement le demi-cercle du HAUT => y = cy - sin(a)*r
+ *   Donc on utilise un angle "0..PI" et on inverse le Y (déjà fait).
+ * - Les ARCS (ctx.arc): on veut dessiner sur le haut aussi, mais ctx.arc utilise le repère canvas (Y vers le bas).
+ *   Donc on dessine les arcs sur PI..2PI.
+ */
+
+// AIGUILLES (0..PI)
+function pctToNeedleAngle(pct){
   // 0% = gauche (PI), 100% = droite (0)
+  return Math.PI - (pct/100) * Math.PI;
+}
+
+// ARCS (PI..2PI)
+function pctToArcAngle(pct){
+  // 0% = gauche (PI), 100% = droite (2PI)
   return Math.PI + (pct/100) * Math.PI;
 }
 
-/**
- * Trace une bande colorée autour d'un centerPct, uniquement sur le demi-cercle du haut.
- * On force le sens (startAngle > endAngle) et on clip pour empêcher toute fuite en bas.
- */
+function drawBaseArc(cx,cy,r){
+  ctx.save();
+  ctx.strokeStyle="rgba(255,255,255,.18)";
+  ctx.lineWidth=60;
+  ctx.lineCap="round";
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, Math.PI, Math.PI*2, false); // demi-cercle haut
+  ctx.stroke();
+  ctx.restore();
+}
 function drawArcBand(cx,cy,r, centerPct, radiusPct, color, lw){
   const leftPct  = clamp(centerPct - radiusPct, 0, 100);
   const rightPct = clamp(centerPct + radiusPct, 0, 100);
 
-  // Angles pour arcs sur la moitié HAUTE
-  const aLeft  = pctToArcAngle(leftPct);   // PI .. 2PI
-  const aRight = pctToArcAngle(rightPct);  // PI .. 2PI (>= aLeft)
+  const aLeft  = pctToArcAngle(leftPct);
+  const aRight = pctToArcAngle(rightPct);
 
   ctx.save();
   ctx.strokeStyle = color;
   ctx.lineWidth = lw;
   ctx.lineCap = "butt";
   ctx.beginPath();
-  ctx.arc(cx, cy, r, aLeft, aRight, false); // pas de wrap possible ici
+  ctx.arc(cx, cy, r, aLeft, aRight, false);
   ctx.stroke();
   ctx.restore();
 }
@@ -778,22 +785,19 @@ function drawArcBand(cx,cy,r, centerPct, radiusPct, color, lw){
 function drawScoringBands(cx, cy, r){
   const ringR = r - 18;
   const lw = 40;
-
-  // Du plus large au plus précis (rouge -> orange -> vert)
   drawArcBand(cx, cy, ringR, secret, Z_RED,    "rgba(239,68,68,.28)",  lw);
   drawArcBand(cx, cy, ringR, secret, Z_ORANGE, "rgba(245,158,11,.32)", lw);
   drawArcBand(cx, cy, ringR, secret, Z_GREEN,  "rgba(34,197,94,.36)",  lw);
 }
 
 function drawNeedle(pct, color, width, cx,cy,r){
-  const a = pctToAngle(pct);
+  const a = pctToNeedleAngle(pct);
   const nx = cx + Math.cos(a)*r;
   const ny = cy - Math.sin(a)*r;
 
   ctx.save();
   ctx.lineCap="round";
 
-  // contour sombre (d'abord)
   ctx.strokeStyle = "rgba(0,0,0,.55)";
   ctx.lineWidth = width + 3;
   ctx.beginPath();
@@ -801,7 +805,6 @@ function drawNeedle(pct, color, width, cx,cy,r){
   ctx.lineTo(nx,ny);
   ctx.stroke();
 
-  // couleur (ensuite)
   ctx.strokeStyle = color;
   ctx.lineWidth = width;
   ctx.beginPath();
@@ -811,17 +814,7 @@ function drawNeedle(pct, color, width, cx,cy,r){
 
   ctx.restore();
 }
-  function drawBaseArc(cx,cy,r){
-  ctx.save();
-  ctx.strokeStyle="rgba(255,255,255,.18)";
-  ctx.lineWidth=60;
-  ctx.lineCap="round";
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, Math.PI, Math.PI*2, false); // demi-cercle HAUT (PI -> 2PI)
-  ctx.stroke();
-  ctx.restore();
-}
-  
+
 function drawDial({mode}){
   ctx.clearRect(0,0,900,520);
   const cx=450, cy=460, r=320;
@@ -843,7 +836,7 @@ function drawDial({mode}){
   if(mode === "psychic"){
     drawNeedle(secret, "rgba(255,255,255,.90)", 6, cx,cy,r);
 
-    const as = pctToAngle(secret);
+    const as = pctToNeedleAngle(secret);
     ctx.save();
     ctx.fillStyle = "#f97316";
     ctx.beginPath();
@@ -876,7 +869,7 @@ function drawDial({mode}){
       drawNeedle(g, p.color, 5, cx,cy,r);
     }
 
-    const as = pctToAngle(secret);
+    const as = pctToNeedleAngle(secret);
     ctx.save();
     ctx.fillStyle = "#f97316";
     ctx.beginPath();
@@ -943,7 +936,6 @@ function checkVictory(){
   const target = Number(settings.pointsToWin || 20);
   if(!Number.isFinite(target) || target <= 0) return null;
 
-  // si plusieurs dépassent, on prend le plus haut
   let best = null;
   for(const p of players){
     if(p.score >= target){
@@ -972,7 +964,6 @@ function updateUI(){
         openSetup();
         return;
       }
-      // Psychic aléatoire au tout début
       if(!currentCategory){
         psychicIndex = rand(0, players.length-1);
       }
@@ -1256,9 +1247,7 @@ btnSaveSettings.onclick = ()=>{
 
 /* ===================== WINNER MODAL ===================== */
 btnCloseWinner.onclick = closeWinner;
-btnContinue.onclick = ()=>{
-  closeWinner();
-};
+btnContinue.onclick = ()=> closeWinner();
 btnResetAll.onclick = ()=>{
   players.forEach(p=>p.score=0);
   savePlayers();
