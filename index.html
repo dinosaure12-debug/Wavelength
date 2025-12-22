@@ -419,17 +419,16 @@ select:focus, input[type="text"]:focus{
 const CATEGORY_PACKS = {
   table: {
     label: "Autour de la table (adjectifs)",
-    items: ["le plus radin", "le plus drôle", "le plus susceptible", "le plus organisé", "le plus en retard", "le plus chill",
-            "le plus compétitif", "le plus têtu", "le plus diplomate", "le plus bordélique", "le plus chanceux", "le plus malchanceux"]
+    items: ["radin", "drôle", "susceptible", "organisé", "retardataire", "chill",
+            "compétitif", "têtu", "diplomate", " bordélique", "chanceux", "malchanceux"]
   },
   objets: {
     label: "Objets",
-    items: ["télécommande", "chargeur", "chaussure", "mug", "couteau suisse", "brosse à dents", "cadenas", "casque", "parapluie",
-            "sac à dos", "lunettes", "gourde", "clavier", "clé USB", "cahier"]
+    items: ["chaussure", "voiture", "console" , "Moyen de locomotion"]
   },
   bouffe: {
     label: "Bouffe",
-    items: ["pizza", "kebab", "pâtes", "tacos", "sushi", "croissant", "raclette", "frites", "burger", "fromage", "dessert", "café"]
+    items: ["charcuterie pour une raclette","fromage", "burger", "plat", "dessert", "boisson", "viennoiserie"]
   },
   pop: {
     label: "Pop culture",
@@ -437,7 +436,7 @@ const CATEGORY_PACKS = {
   },
   lieux: {
     label: "Lieux",
-    items: ["aéroport", "plage", "camping", "centre commercial", "métro", "stade", "cinéma", "hôpital", "boîte de nuit", "boulangerie"]
+    items: ["aéroport", "plage", "camping", "centre commercial", "métro", "stade", "boîte de nuit"]
   },
   marques: {
     label: "Marques",
@@ -447,14 +446,14 @@ const CATEGORY_PACKS = {
 
 /* ===================== COLORS ===================== */
 const COLOR_CHOICES = [
-  {label:"Bleu",   value:"#60a5fa"},
-  {label:"Violet", value:"#a78bfa"},
-  {label:"Rose",   value:"#fb7185"},
-  {label:"Rouge",  value:"#f87171"},
-  {label:"Orange", value:"#fb923c"},
-  {label:"Jaune",  value:"#facc15"},
-  {label:"Vert",   value:"#4ade80"},
-  {label:"Turquoise", value:"#2dd4bf"},
+  {label:"Bleu électrique", value:"#2979FF"},
+  {label:"Cyan néon",       value:"#00E5FF"},
+  {label:"Vert néon",       value:"#A3FF12"},
+  {label:"Jaune punchy",    value:"#FFD400"},
+  {label:"Orange vif",      value:"#FF6B00"},
+  {label:"Rouge néon",      value:"#FF1744"},
+  {label:"Rose néon",       value:"#FF2D95"},
+  {label:"Violet pop",      value:"#7C4DFF"},
 ];
 
 /* ===================== SCORING ZONES ===================== */
@@ -640,19 +639,25 @@ function drawBaseArc(cx,cy,r){
 function drawArcBand(cx,cy,r, centerPct, radiusPct, color, lw){
   const leftPct  = clamp(centerPct - radiusPct, 0, 100);
   const rightPct = clamp(centerPct + radiusPct, 0, 100);
-  const aLeft  = pctToAngle(leftPct);
-  const aRight = pctToAngle(rightPct);
+
+  const aLeft  = pctToAngle(leftPct);   // proche de PI
+  const aRight = pctToAngle(rightPct);  // proche de 0
+
+  // IMPORTANT: on trace TOUJOURS du plus petit angle vers le plus grand
+  // pour éviter le "wrap" qui colorie presque tout le cercle.
+  const a1 = Math.min(aLeft, aRight);
+  const a2 = Math.max(aLeft, aRight);
 
   ctx.save();
   ctx.strokeStyle = color;
   ctx.lineWidth = lw;
   ctx.lineCap = "butt";
   ctx.beginPath();
-  // aLeft > aRight, c'est ok: on trace la portion autour du secret
-  ctx.arc(cx, cy, r, aLeft, aRight, false);
+  ctx.arc(cx, cy, r, a1, a2, false);
   ctx.stroke();
   ctx.restore();
 }
+
 
 function drawScoringBands(cx,cy,r){
   const ringR = r - 18;
@@ -670,16 +675,26 @@ function drawNeedle(pct, color, width, cx,cy,r){
   const ny = cy - Math.sin(a)*r;
 
   ctx.save();
-  ctx.strokeStyle = color;
-  ctx.lineWidth = width;
   ctx.lineCap="round";
+
+  // contour sombre (d'abord)
+  ctx.strokeStyle = "rgba(0,0,0,.55)";
+  ctx.lineWidth = width + 3;
   ctx.beginPath();
   ctx.moveTo(cx,cy);
   ctx.lineTo(nx,ny);
   ctx.stroke();
+
+  // couleur (ensuite)
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.beginPath();
+  ctx.moveTo(cx,cy);
+  ctx.lineTo(nx,ny);
+  ctx.stroke();
+
   ctx.restore();
 }
-
 function drawDial({mode}){
   ctx.clearRect(0,0,900,520);
   const cx=450, cy=460, r=320;
