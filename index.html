@@ -378,6 +378,17 @@ select:focus, input[type="text"]:focus{
       </div>
       <button id="btnCloseSettings" class="ghost">Fermer</button>
     </div>
+<div class="row">
+  <div class="field">
+    <label>Points pour gagner</label>
+    <input id="pointsToWinInput"
+           type="text"
+           inputmode="numeric"
+           placeholder="ex : 20" />
+    <div class="small">Le premier qui atteint ce total gagne.</div>
+  </div>
+</div>
+
 
     <div id="packsList" class="playersList"></div>
 
@@ -422,6 +433,7 @@ const SETTINGS_KEY = "wl_mobile_settings_v1";
 let settings = {
   packsEnabled: { table:true, pop:true, places:true, brands:false, celebs:false, abstract:true }
 };
+  
 
 function loadSettings(){
   try{
@@ -475,6 +487,25 @@ function pointsForGuess(secret, guess){
 
 /* ===================== STATE ===================== */
 const STORAGE_KEY = "wl_mobile_players_v2";
+const SETTINGS_KEY = "wl_mobile_settings_v1";
+
+let settings = {
+  pointsToWin: 20
+};
+
+function saveSettings(){
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+}
+function loadSettings(){
+  try{
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if(!raw) return;
+    const data = JSON.parse(raw);
+    if(typeof data.pointsToWin === "number") settings.pointsToWin = data.pointsToWin;
+  }catch(e){}
+}
+
+
 
 let players = []; // {id,name,color,score}
 let psychicIndex = 0;
@@ -524,11 +555,26 @@ const packsList = document.getElementById("packsList");
 const btnSelectAll = document.getElementById("btnSelectAll");
 const btnSelectNone = document.getElementById("btnSelectNone");
 const btnSaveSettings = document.getElementById("btnSaveSettings");
+  const pointsToWinInput = document.getElementById("pointsToWinInput");
+
+
 
 /* ===================== UTILS ===================== */
 const rand = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
 const uid = ()=>"p_"+Math.random().toString(36).slice(2,10);
+
+  function saveSettings(){
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+}
+function loadSettings(){
+  try{
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if(!raw) return;
+    const data = JSON.parse(raw);
+    if(typeof data.pointsToWin === "number") settings.pointsToWin = data.pointsToWin;
+  }catch(e){}
+}
 
 function savePlayers(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify({players, psychicIndex}));
@@ -836,6 +882,14 @@ function updateUI(){
         if(g == null) continue;
         p.score += pointsForGuess(secret, g);
       }
+      // Vérifie la victoire
+const winner = players.reduce((best, p)=> (p.score > (best?.score ?? -1) ? p : best), null);
+if(winner && winner.score >= (settings.pointsToWin || 20)){
+  alert("Bravo " + winner.name + " ! Tu as gagné avec " + winner.score + " points.");
+  // Option simple: reset scores automatique (ou pas)
+  // players.forEach(p=>p.score=0); savePlayers(); renderScores();
+}
+
       roundScored = true;
       renderScores();
       savePlayers();
@@ -990,6 +1044,7 @@ btnStart.onclick = ()=>{
   savePlayers();
   closeSetup();
   phase = "setup";
+  loadSettings();
   updateUI();
 };
 
@@ -1003,7 +1058,8 @@ function closeSettings(){
 }
 
 function renderSettingsUI(){
-  packsList.innerHTML = "";
+  pointsToWinInput.value = String(settings.pointsToWin || 20);
+  packsList.innerHTML = "";  
   for(const [key, pack] of Object.entries(CATEGORY_PACKS)){
     const row = document.createElement("div");
     row.className = "scoreline";
@@ -1050,6 +1106,15 @@ btnSelectNone.onclick = ()=>{
 };
 
 btnSaveSettings.onclick = ()=>{
+  const v = parseInt(pointsToWinInput.value, 10);
+if(!Number.isNaN(v) && v >= 1 && v <= 999){
+  settings.pointsToWin = v;
+}
+const v = parseInt((pointsToWinInput.value || "").trim(), 10);
+if(!Number.isNaN(v) && v >= 1 && v <= 999){
+  settings.pointsToWin = v;
+}
+
   saveSettings();
   closeSettings();
 };
@@ -1076,6 +1141,7 @@ if(!loadPlayers()){
 
 phase = "setup";
 currentCategory = null;
+loadSettings();
 updateUI();
 </script>
 
