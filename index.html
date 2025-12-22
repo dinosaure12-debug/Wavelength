@@ -757,31 +757,31 @@ function pctToAngle(pct){
  * Trace une bande colorée autour d'un centerPct, uniquement sur le demi-cercle du haut.
  * On force le sens (startAngle > endAngle) et on clip pour empêcher toute fuite en bas.
  */
-function drawArcBand(cx, cy, r, centerPct, radiusPct, color, lw){
+function drawArcBand(cx,cy,r, centerPct, radiusPct, color, lw){
   const leftPct  = clamp(centerPct - radiusPct, 0, 100);
   const rightPct = clamp(centerPct + radiusPct, 0, 100);
 
-  const aLeft  = pctToAngle(leftPct);
-  const aRight = pctToAngle(rightPct);
+  // pctToAngle: 0% -> PI (gauche), 100% -> 0 (droite)
+  // Donc à gauche l'angle est PLUS GRAND que celui de droite.
+  const aLeft  = pctToAngle(leftPct);   // proche de PI
+  const aRight = pctToAngle(rightPct);  // proche de 0
 
+  // On veut tracer UNIQUEMENT sur la moitié haute (0..PI)
+  const start = clamp(aLeft,  0, Math.PI);
+  const end   = clamp(aRight, 0, Math.PI);
+
+  // Canvas trace par défaut dans le sens horaire si start > end sur [0..PI]
+  // => on garde start (gauche) -> end (droite)
   ctx.save();
-
-  // Clip de sécurité : interdit de dessiner sous le centre
-  ctx.beginPath();
-  ctx.rect(0, 0, ctx.canvas.width, cy);
-  ctx.clip();
-
   ctx.strokeStyle = color;
   ctx.lineWidth = lw;
   ctx.lineCap = "butt";
-
   ctx.beginPath();
-  // startAngle > endAngle = arc du haut (comme ton arc de base)
-  ctx.arc(cx, cy, r, aLeft, aRight, false);
+  ctx.arc(cx, cy, r, start, end, false);
   ctx.stroke();
-
   ctx.restore();
 }
+
 function drawScoringBands(cx, cy, r){
   const ringR = r - 18;
   const lw = 40;
