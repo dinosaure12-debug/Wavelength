@@ -734,14 +734,14 @@ function drawArcBand(cx, cy, r, centerPct, radiusPct, color, lw){
   const leftPct  = clamp(centerPct - radiusPct, 0, 100);
   const rightPct = clamp(centerPct + radiusPct, 0, 100);
 
-  const aLeft  = pctToAngle(leftPct);   // proche de PI
-  const aRight = pctToAngle(rightPct);  // proche de 0
+  const aLeft  = pctToAngle(leftPct);
+  const aRight = pctToAngle(rightPct);
 
   ctx.save();
 
-  // Clip "haut de canvas" (sécurité) : interdit de dessiner sous le centre (cy)
+  // Clip de sécurité : interdit de dessiner sous le centre
   ctx.beginPath();
-  ctx.rect(0, 0, canvas.width, cy); // seulement la zone au-dessus du centre
+  ctx.rect(0, 0, ctx.canvas.width, cy);
   ctx.clip();
 
   ctx.strokeStyle = color;
@@ -749,14 +749,12 @@ function drawArcBand(cx, cy, r, centerPct, radiusPct, color, lw){
   ctx.lineCap = "butt";
 
   ctx.beginPath();
-  // IMPORTANT: startAngle = aLeft (plus grand), endAngle = aRight (plus petit)
-  // => ça suit le demi-cercle du haut (même logique que arc(Math.PI,0,false))
+  // startAngle > endAngle = arc du haut (comme ton arc de base)
   ctx.arc(cx, cy, r, aLeft, aRight, false);
   ctx.stroke();
 
   ctx.restore();
 }
-
 function drawScoringBands(cx, cy, r){
   const ringR = r - 18;
   const lw = 40;
