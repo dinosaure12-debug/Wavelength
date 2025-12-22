@@ -81,8 +81,6 @@ body{
   text-align:center;
 }
 
-.vs{ color: rgba(255,255,255,.65); font-weight:900; }
-
 canvas{
   width: 100%;
   max-width: 620px;
@@ -210,7 +208,7 @@ input[type="range"]{
   text-align:center;
 }
 
-/* ===== Setup modal ===== */
+/* ===== overlays ===== */
 .overlay{
   position: fixed;
   inset: 0;
@@ -303,7 +301,6 @@ select:focus, input[type="text"]:focus{
   <div class="panel">
     <canvas id="canvas" width="900" height="520"></canvas>
 
-    <!-- Slider (Team only) -->
     <div id="sliderWrap" class="sliderWrap hidden">
       <div class="sliderTop">
         <div class="badge">Réglage précis</div>
@@ -312,22 +309,22 @@ select:focus, input[type="text"]:focus{
       <input id="needleSlider" type="range" min="0" max="100" step="1" value="50" />
     </div>
 
-    <!-- Legend (Reveal only) -->
     <div id="legendWrap" class="legend hidden" style="max-width:620px; margin:10px auto 0 auto;">
       <span><span class="dot" style="background:var(--green)"></span>Vert 5 % = 4 pts</span>
       <span><span class="dot" style="background:var(--orange)"></span>Orange 7 % = 2 pts</span>
       <span><span class="dot" style="background:var(--red)"></span>Rouge 11 % = 1 pt</span>
     </div>
+
     <div id="revealNote" class="revealNote hidden">
       Barre blanche épaisse = Psychic. Barres fines = joueurs (couleurs choisies).
     </div>
   </div>
 
   <div class="panel controls">
-  <button id="btnSetup" class="ghost">Participants</button>
-  <button id="btnSettings" class="ghost">Paramètres</button>
-  <button id="actionBtn" class="primary">Nouvelle partie</button>
-</div>
+    <button id="btnSetup" class="ghost">Participants</button>
+    <button id="btnSettings" class="ghost">Paramètres</button>
+    <button id="actionBtn" class="primary">Nouvelle partie</button>
+  </div>
 
   <div class="panel" id="scoresPanel">
     <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
@@ -338,7 +335,7 @@ select:focus, input[type="text"]:focus{
   </div>
 </div>
 
-<!-- Setup overlay -->
+<!-- Participants overlay -->
 <div id="setupOverlay" class="overlay">
   <div class="modal">
     <div class="row" style="justify-content:space-between;">
@@ -349,26 +346,6 @@ select:focus, input[type="text"]:focus{
       <button id="btnCloseSetup" class="ghost">Fermer</button>
     </div>
 
-    <!-- Settings overlay -->
-<div id="settingsOverlay" class="overlay">
-  <div class="modal">
-    <div class="row" style="justify-content:space-between;">
-      <div>
-        <h2>Paramètres</h2>
-        <div class="small">Choisis les packs de catégories utilisés pour la manche.</div>
-      </div>
-      <button id="btnCloseSettings" class="ghost">Fermer</button>
-    </div>
-
-    <div id="packsList" class="playersList"></div>
-
-    <div class="row" style="justify-content:flex-end;">
-      <button id="btnSelectAll" class="ghost">Tout cocher</button>
-      <button id="btnSelectNone" class="ghost">Tout décocher</button>
-      <button id="btnSaveSettings" class="primary">Enregistrer</button>
-    </div>
-  </div>
-</div>
     <div class="row">
       <div class="field">
         <label>Nombre de participants</label>
@@ -391,8 +368,6 @@ select:focus, input[type="text"]:focus{
   </div>
 </div>
 
-<script>
-/* ===================== THEMES ===================== */
 <!-- Settings overlay -->
 <div id="settingsOverlay" class="overlay">
   <div class="modal">
@@ -414,6 +389,65 @@ select:focus, input[type="text"]:focus{
   </div>
 </div>
 
+<script>
+/* ===================== PACKS ===================== */
+const CATEGORY_PACKS = {
+  table: {
+    label: "Les gens autour de la table",
+    items: ["Drôle","Gênant","Charismatique","Prétentieux","Stylé","Beauf","Suspect","Fiable","Discret","Attachant","Insupportable"]
+  },
+  pop: {
+    label: "Pop culture",
+    items: ["Film","Série","Acteur","Personnage","Jeu vidéo","Streamer","Album","Rappeur","Influenceur"]
+  },
+  places: {
+    label: "Lieux",
+    items: ["Ville","Pays","Bar","Restaurant","Aéroport","Plage","Boîte","Open space","Salle d’attente"]
+  },
+  brands: {
+    label: "Marques",
+    items: ["Marque de voiture","Marque de luxe","Fast-food","Réseau social","Appli","Sneakers","Boisson"]
+  },
+  celebs: {
+    label: "Célébrités",
+    items: ["Acteur","Chanteur","Rappeur","Sportif","Humoriste","Influenceur","Politicien"]
+  },
+  abstract: {
+    label: "Abstrait (Wavelength)",
+    items: ["Classe","Style","Vibe","Malaise","Cringe","Aura","Chaos","Normalité","Légendaire","Surcoté","Sous-coté"]
+  }
+};
+
+const SETTINGS_KEY = "wl_mobile_settings_v1";
+let settings = {
+  packsEnabled: { table:true, pop:true, places:true, brands:false, celebs:false, abstract:true }
+};
+
+function loadSettings(){
+  try{
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if(!raw) return;
+    const data = JSON.parse(raw);
+    if(data && data.packsEnabled) settings.packsEnabled = data.packsEnabled;
+  }catch(e){}
+}
+function saveSettings(){
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+}
+
+function getEnabledWords(){
+  const words = [];
+  for(const [key, pack] of Object.entries(CATEGORY_PACKS)){
+    if(settings.packsEnabled[key]) words.push(...pack.items);
+  }
+  if(words.length === 0) words.push(...CATEGORY_PACKS.abstract.items);
+  return words;
+}
+function pickCategory(){
+  const words = getEnabledWords();
+  return words[Math.floor(Math.random()*words.length)];
+}
+
 /* ===================== COLORS ===================== */
 const COLOR_CHOICES = [
   {label:"Bleu",   value:"#60a5fa"},
@@ -426,10 +460,10 @@ const COLOR_CHOICES = [
   {label:"Turquoise", value:"#2dd4bf"},
 ];
 
-/* ===================== SCORING ZONES (TES REGLES) ===================== */
-const Z_GREEN = 4;   //
-const Z_ORANGE = 7;  //
-const Z_RED = 11;     // 
+/* ===================== SCORING ZONES ===================== */
+const Z_GREEN  = 5;   // ±5 = 4 pts
+const Z_ORANGE = 7;   // ±7 = 2 pts
+const Z_RED    = 11;  // ±11 = 1 pt
 
 function pointsForGuess(secret, guess){
   const d = Math.abs(guess - secret);
@@ -451,7 +485,7 @@ let currentCategory = null;
 let secret = 0;
 let guesses = {};   // by playerId: { [id]: value }
 let currentNeedle = 50;
-let roundScored = false; // important: incrémenter points une seule fois
+let roundScored = false;
 
 /* ===================== DOM ===================== */
 const canvas = document.getElementById("canvas");
@@ -462,6 +496,7 @@ const turnSub   = document.getElementById("turnSub");
 const pairDiv   = document.getElementById("pair");
 
 const btnSetup  = document.getElementById("btnSetup");
+const btnSettings = document.getElementById("btnSettings");
 const btn       = document.getElementById("actionBtn");
 
 const sliderWrap = document.getElementById("sliderWrap");
@@ -481,14 +516,14 @@ const playerCount = document.getElementById("playerCount");
 const playersList = document.getElementById("playersList");
 const btnRandomPsychic = document.getElementById("btnRandomPsychic");
 const btnStart = document.getElementById("btnStart");
-const btnSettings = document.getElementById("btnSettings");
+
+/* Settings overlay */
 const settingsOverlay = document.getElementById("settingsOverlay");
 const btnCloseSettings = document.getElementById("btnCloseSettings");
 const packsList = document.getElementById("packsList");
 const btnSelectAll = document.getElementById("btnSelectAll");
 const btnSelectNone = document.getElementById("btnSelectNone");
 const btnSaveSettings = document.getElementById("btnSaveSettings");
-
 
 /* ===================== UTILS ===================== */
 const rand = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
@@ -518,6 +553,7 @@ function loadPlayers(){
   return false;
 }
 
+/* ===================== CATEGORY UI ===================== */
 function pickCategoryOnce(){
   currentCategory = pickCategory();
 }
@@ -529,32 +565,23 @@ function renderPair(){
   pairDiv.innerHTML = `<span class="pill">${currentCategory}</span>`;
 }
 
-  const [L,R] = roundPair;
-  pairDiv.innerHTML = `
-    <span class="pill">${L}</span>
-    <span class="vs">↔</span>
-    <span class="pill">${R}</span>
-  `;
-}
-
 /* ===================== DRAW ===================== */
 function pctToAngle(pct){
-  // 0% = gauche (PI), 100% = droite (0)
-  return Math.PI - (pct/100) * Math.PI;
+  return Math.PI - (pct/100) * Math.PI; // 0% gauche (PI) -> 100% droite (0)
 }
 
 function bandColorForPct(pct){
   const d = Math.abs(pct - secret);
-  if (d <= Z_GREEN)  return "rgba(34,197,94,.85)";   // vert
-  if (d <= Z_ORANGE) return "rgba(245,158,11,.85)";  // orange
-  if (d <= Z_RED)    return "rgba(239,68,68,.85)";   // rouge
+  if (d <= Z_GREEN)  return "rgba(34,197,94,.85)";
+  if (d <= Z_ORANGE) return "rgba(245,158,11,.85)";
+  if (d <= Z_RED)    return "rgba(239,68,68,.85)";
   return null;
 }
 
 function drawScoringBandsSampled(cx, cy, r){
-  const ringR = r - 20;   // rayon des bandes (anneau)
-  const lw = 40;          // épaisseur
-  const step = 0.25;      // finesse (0.25 ou 0.5)
+  const ringR = r - 20;
+  const lw = 40;
+  const step = 0.25;
 
   const startPct = clamp(secret - Z_RED, 0, 100);
   const endPct   = clamp(secret + Z_RED, 0, 100);
@@ -573,7 +600,6 @@ function drawScoringBandsSampled(cx, cy, r){
     const x = cx + Math.cos(a) * ringR;
     const y = cy - Math.sin(a) * ringR;
 
-    // Si on change de couleur, on "flush" le trait précédent
     if(col !== currentColor){
       if(hasPath){
         ctx.stroke();
@@ -589,7 +615,6 @@ function drawScoringBandsSampled(cx, cy, r){
       continue;
     }
 
-    // Même couleur => on continue la polyligne
     if(currentColor){
       if(!hasPath){
         ctx.strokeStyle = currentColor;
@@ -653,7 +678,6 @@ function drawDial({mode}){
 
   if(mode === "psychic"){
     drawNeedle(secret, "rgba(255,255,255,.90)", 6, cx,cy,r);
-
     const as = pctToAngle(secret);
     ctx.save();
     ctx.fillStyle = "#f97316";
@@ -665,7 +689,6 @@ function drawDial({mode}){
 
   if(mode === "team"){
     drawNeedle(currentNeedle, "rgba(255,255,255,.92)", 6, cx,cy,r);
-
     ctx.save();
     ctx.fillStyle="rgba(255,255,255,.88)";
     ctx.font="900 32px Arial";
@@ -703,7 +726,7 @@ function nextRound(){
   secret = rand(0,100);
   currentNeedle = 50;
   roundScored = false;
-  pickPairOnce();
+  pickCategoryOnce();
   phase = "psychic";
   updateUI();
 }
@@ -746,7 +769,6 @@ function updateUI(){
   renderScores();
   savePlayers();
 
-  // Affichages conditionnels
   sliderWrap.classList.toggle("hidden", phase !== "team");
   legendWrap.classList.toggle("hidden", phase !== "reveal");
   revealNote.classList.toggle("hidden", phase !== "reveal");
@@ -754,18 +776,16 @@ function updateUI(){
   if(phase === "setup"){
     turnTitle.textContent = "Wavelength";
     turnSub.textContent = "Configure les participants puis démarre.";
-    drawDial({mode:"team"}); // neutre
+    drawDial({mode:"team"});
     btn.textContent = players.length ? "Démarrer une manche" : "Nouvelle partie";
     btn.onclick = ()=>{
       if(players.length < 2){
         openSetup();
         return;
       }
-      // Psychic aléatoire au tout début si première manche
       if(!currentCategory){
-  psychicIndex = rand(0, players.length-1);
-}
-
+        psychicIndex = rand(0, players.length-1);
+      }
       nextRound();
     };
     return;
@@ -808,7 +828,6 @@ function updateUI(){
   }
 
   if(phase === "reveal"){
-    // incrémenter les points UNE seule fois par manche
     if(!roundScored){
       const psychicId = players[psychicIndex]?.id;
       for(const p of players){
@@ -828,7 +847,6 @@ function updateUI(){
 
     btn.textContent = "Manche suivante (Psychic suivant)";
     btn.onclick = ()=>{
-      // Psychic suivant (rotation)
       psychicIndex = (psychicIndex + 1) % players.length;
       nextRound();
     };
@@ -836,7 +854,7 @@ function updateUI(){
   }
 }
 
-/* ===================== TEAM INPUTS: CANVAS DRAG + SLIDER ===================== */
+/* ===================== TEAM INPUTS ===================== */
 function pointerToPct(ev){
   const rect = canvas.getBoundingClientRect();
   const x = clamp((ev.clientX - rect.left) / rect.width, 0, 1);
@@ -905,7 +923,7 @@ function hydrateSetupUI(){
   ensurePlayersCount(n);
 
   playersList.innerHTML = "";
-  players.forEach((p, idx)=>{
+  players.forEach((p)=>{
     const row = document.createElement("div");
     row.className = "playerRow";
 
@@ -946,12 +964,10 @@ playerCount.addEventListener("change", hydrateSetupUI);
 btnRandomPsychic.onclick = ()=>{
   if(players.length < 2) return;
   psychicIndex = rand(0, players.length-1);
-  // juste une info dans l’UI principale
   turnSub.textContent = `Psychic aléatoire prêt : ${players[psychicIndex].name}.`;
 };
 
 btnStart.onclick = ()=>{
-  // lire inputs + selects
   const inputs = playersList.querySelectorAll('input[data-pid]');
   inputs.forEach(inp=>{
     const p = players.find(x=>x.id === inp.dataset.pid);
@@ -967,11 +983,9 @@ btnStart.onclick = ()=>{
     p.color = sel.value;
   });
 
-  // Psychic aléatoire au démarrage de partie (si on repart de zéro)
-if(!currentCategory){
-  psychicIndex = rand(0, players.length-1);
-}
-
+  if(!currentCategory){
+    psychicIndex = rand(0, players.length-1);
+  }
 
   savePlayers();
   closeSetup();
@@ -979,12 +993,7 @@ if(!currentCategory){
   updateUI();
 };
 
-/* ===================== RESET SCORES ===================== */
-btnResetScores.onclick = ()=>{
-  players.forEach(p=>p.score = 0);
-  savePlayers();
-  renderScores();
-};
+/* ===================== SETTINGS MODAL ===================== */
 function openSettings(){
   settingsOverlay.classList.add("show");
   renderSettingsUI();
@@ -995,7 +1004,6 @@ function closeSettings(){
 
 function renderSettingsUI(){
   packsList.innerHTML = "";
-
   for(const [key, pack] of Object.entries(CATEGORY_PACKS)){
     const row = document.createElement("div");
     row.className = "scoreline";
@@ -1046,7 +1054,16 @@ btnSaveSettings.onclick = ()=>{
   closeSettings();
 };
 
+/* ===================== RESET SCORES ===================== */
+btnResetScores.onclick = ()=>{
+  players.forEach(p=>p.score = 0);
+  savePlayers();
+  renderScores();
+};
+
 /* ===================== INIT ===================== */
+loadSettings();
+
 if(!loadPlayers()){
   players = [
     {id:uid(), name:"Joueur 1", color: COLOR_CHOICES[0].value, score:0},
@@ -1059,7 +1076,6 @@ if(!loadPlayers()){
 
 phase = "setup";
 currentCategory = null;
-loadSettings();
 updateUI();
 </script>
 
