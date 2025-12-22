@@ -77,7 +77,7 @@ body{
   border-radius:999px;
   background: rgba(255,255,255,.08);
   border: 1px solid var(--border);
-  min-width: 180px;
+  min-width: 220px;
   text-align:center;
 }
 
@@ -208,7 +208,7 @@ input[type="range"]{
   text-align:center;
 }
 
-/* ===== overlays ===== */
+/* ===== Modals ===== */
 .overlay{
   position: fixed;
   inset: 0;
@@ -310,11 +310,10 @@ select:focus, input[type="text"]:focus{
     </div>
 
     <div id="legendWrap" class="legend hidden" style="max-width:620px; margin:10px auto 0 auto;">
-      <span><span class="dot" style="background:var(--green)"></span>Vert 5 % = 4 pts</span>
-      <span><span class="dot" style="background:var(--orange)"></span>Orange 7 % = 2 pts</span>
-      <span><span class="dot" style="background:var(--red)"></span>Rouge 11 % = 1 pt</span>
+      <span><span class="dot" style="background:var(--green)"></span>Vert ±5 = 4 pts</span>
+      <span><span class="dot" style="background:var(--orange)"></span>Orange ±7 = 2 pts</span>
+      <span><span class="dot" style="background:var(--red)"></span>Rouge ±11 = 1 pt</span>
     </div>
-
     <div id="revealNote" class="revealNote hidden">
       Barre blanche épaisse = Psychic. Barres fines = joueurs (couleurs choisies).
     </div>
@@ -333,9 +332,10 @@ select:focus, input[type="text"]:focus{
     </div>
     <div id="scores" style="margin-top:10px; display:flex; flex-direction:column; gap:8px;"></div>
   </div>
+
 </div>
 
-<!-- Participants overlay -->
+<!-- ===== Participants overlay ===== -->
 <div id="setupOverlay" class="overlay">
   <div class="modal">
     <div class="row" style="justify-content:space-between;">
@@ -354,8 +354,8 @@ select:focus, input[type="text"]:focus{
         </select>
       </div>
       <div class="field">
-        <label>Palette</label>
-        <div class="small">Couleurs visibles au reveal (barres joueurs).</div>
+        <label>Info</label>
+        <div class="small">Les couleurs servent aux barres en reveal.</div>
       </div>
     </div>
 
@@ -368,27 +368,24 @@ select:focus, input[type="text"]:focus{
   </div>
 </div>
 
-<!-- Settings overlay -->
+<!-- ===== Settings overlay ===== -->
 <div id="settingsOverlay" class="overlay">
   <div class="modal">
     <div class="row" style="justify-content:space-between;">
       <div>
         <h2>Paramètres</h2>
-        <div class="small">Choisis les packs de catégories utilisés pour la manche.</div>
+        <div class="small">Choisis les packs de catégories utilisés pour tirer un mot.</div>
       </div>
       <button id="btnCloseSettings" class="ghost">Fermer</button>
     </div>
-<div class="row">
-  <div class="field">
-    <label>Points pour gagner</label>
-    <input id="pointsToWinInput"
-           type="text"
-           inputmode="numeric"
-           placeholder="ex : 20" />
-    <div class="small">Le premier qui atteint ce total gagne.</div>
-  </div>
-</div>
 
+    <div class="row">
+      <div class="field">
+        <label>Points pour gagner</label>
+        <input id="pointsToWinInput" type="text" inputmode="numeric" placeholder="ex : 20" />
+        <div class="small">Le premier qui atteint ce total gagne.</div>
+      </div>
+    </div>
 
     <div id="packsList" class="playersList"></div>
 
@@ -400,65 +397,53 @@ select:focus, input[type="text"]:focus{
   </div>
 </div>
 
+<!-- ===== Winner overlay ===== -->
+<div id="winnerOverlay" class="overlay">
+  <div class="modal">
+    <div class="row" style="justify-content:space-between;">
+      <div>
+        <h2 id="winnerTitle">Victoire</h2>
+        <div class="small" id="winnerSub">Bravo !</div>
+      </div>
+      <button id="btnCloseWinner" class="ghost">Fermer</button>
+    </div>
+    <div class="row" style="justify-content:flex-end;">
+      <button id="btnResetAll" class="ghost">Reset scores</button>
+      <button id="btnContinue" class="primary">Continuer</button>
+    </div>
+  </div>
+</div>
+
 <script>
-/* ===================== PACKS ===================== */
+/* ===================== CATEGORY PACKS ===================== */
 const CATEGORY_PACKS = {
   table: {
-    label: "Les gens autour de la table",
-    items: ["Drôle","Gênant","Charismatique","Prétentieux","Stylé","Beauf","Suspect","Fiable","Discret","Attachant","Insupportable"]
+    label: "Autour de la table (adjectifs)",
+    items: ["le plus radin", "le plus drôle", "le plus susceptible", "le plus organisé", "le plus en retard", "le plus chill",
+            "le plus compétitif", "le plus têtu", "le plus diplomate", "le plus bordélique", "le plus chanceux", "le plus malchanceux"]
+  },
+  objets: {
+    label: "Objets",
+    items: ["télécommande", "chargeur", "chaussure", "mug", "couteau suisse", "brosse à dents", "cadenas", "casque", "parapluie",
+            "sac à dos", "lunettes", "gourde", "clavier", "clé USB", "cahier"]
+  },
+  bouffe: {
+    label: "Bouffe",
+    items: ["pizza", "kebab", "pâtes", "tacos", "sushi", "croissant", "raclette", "frites", "burger", "fromage", "dessert", "café"]
   },
   pop: {
     label: "Pop culture",
-    items: ["Film","Série","Acteur","Personnage","Jeu vidéo","Streamer","Album","Rappeur","Influenceur"]
+    items: ["rappeur", "acteur", "mème", "jeu vidéo", "streamer", "série", "anime", "super-héros", "clip", "banger", "blockbuster"]
   },
-  places: {
+  lieux: {
     label: "Lieux",
-    items: ["Ville","Pays","Bar","Restaurant","Aéroport","Plage","Boîte","Open space","Salle d’attente"]
+    items: ["aéroport", "plage", "camping", "centre commercial", "métro", "stade", "cinéma", "hôpital", "boîte de nuit", "boulangerie"]
   },
-  brands: {
+  marques: {
     label: "Marques",
-    items: ["Marque de voiture","Marque de luxe","Fast-food","Réseau social","Appli","Sneakers","Boisson"]
-  },
-  celebs: {
-    label: "Célébrités",
-    items: ["Acteur","Chanteur","Rappeur","Sportif","Humoriste","Influenceur","Politicien"]
-  },
-  abstract: {
-    label: "Abstrait (Wavelength)",
-    items: ["Classe","Style","Vibe","Malaise","Cringe","Aura","Chaos","Normalité","Légendaire","Surcoté","Sous-coté"]
+    items: ["Nike", "Adidas", "Apple", "Samsung", "PlayStation", "Xbox", "Netflix", "McDo", "Ikea", "Amazon", "Red Bull", "Tesla"]
   }
 };
-
-const SETTINGS_KEY = "wl_mobile_settings_v1";
-let settings = {
-  packsEnabled: { table:true, pop:true, places:true, brands:false, celebs:false, abstract:true }
-};
-  
-
-function loadSettings(){
-  try{
-    const raw = localStorage.getItem(SETTINGS_KEY);
-    if(!raw) return;
-    const data = JSON.parse(raw);
-    if(data && data.packsEnabled) settings.packsEnabled = data.packsEnabled;
-  }catch(e){}
-}
-function saveSettings(){
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-}
-
-function getEnabledWords(){
-  const words = [];
-  for(const [key, pack] of Object.entries(CATEGORY_PACKS)){
-    if(settings.packsEnabled[key]) words.push(...pack.items);
-  }
-  if(words.length === 0) words.push(...CATEGORY_PACKS.abstract.items);
-  return words;
-}
-function pickCategory(){
-  const words = getEnabledWords();
-  return words[Math.floor(Math.random()*words.length)];
-}
 
 /* ===================== COLORS ===================== */
 const COLOR_CHOICES = [
@@ -473,9 +458,9 @@ const COLOR_CHOICES = [
 ];
 
 /* ===================== SCORING ZONES ===================== */
-const Z_GREEN  = 5;   // ±5 = 4 pts
-const Z_ORANGE = 7;   // ±7 = 2 pts
-const Z_RED    = 11;  // ±11 = 1 pt
+const Z_GREEN  = 5;   // ±5 -> 4 pts
+const Z_ORANGE = 7;   // ±7 -> 2 pts
+const Z_RED    = 11;  // ±11 -> 1 pt
 
 function pointsForGuess(secret, guess){
   const d = Math.abs(guess - secret);
@@ -485,28 +470,11 @@ function pointsForGuess(secret, guess){
   return 0;
 }
 
+/* ===================== STORAGE ===================== */
+const STORAGE_KEY  = "wl_mobile_players_v3";
+const SETTINGS_KEY = "wl_mobile_settings_v2";
+
 /* ===================== STATE ===================== */
-const STORAGE_KEY = "wl_mobile_players_v2";
-const SETTINGS_KEY = "wl_mobile_settings_v1";
-
-let settings = {
-  pointsToWin: 20
-};
-
-function saveSettings(){
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-}
-function loadSettings(){
-  try{
-    const raw = localStorage.getItem(SETTINGS_KEY);
-    if(!raw) return;
-    const data = JSON.parse(raw);
-    if(typeof data.pointsToWin === "number") settings.pointsToWin = data.pointsToWin;
-  }catch(e){}
-}
-
-
-
 let players = []; // {id,name,color,score}
 let psychicIndex = 0;
 
@@ -514,9 +482,14 @@ let phase = "setup"; // setup | psychic | team | reveal
 let currentCategory = null;
 
 let secret = 0;
-let guesses = {};   // by playerId: { [id]: value }
+let guesses = {};   // { playerId: value }
 let currentNeedle = 50;
 let roundScored = false;
+
+let settings = {
+  pointsToWin: 20,
+  packsEnabled: {} // key: boolean
+};
 
 /* ===================== DOM ===================== */
 const canvas = document.getElementById("canvas");
@@ -540,7 +513,7 @@ const revealNote = document.getElementById("revealNote");
 const scoresDiv = document.getElementById("scores");
 const btnResetScores = document.getElementById("btnResetScores");
 
-/* Setup overlay */
+/* Participants overlay */
 const setupOverlay = document.getElementById("setupOverlay");
 const btnCloseSetup = document.getElementById("btnCloseSetup");
 const playerCount = document.getElementById("playerCount");
@@ -555,26 +528,20 @@ const packsList = document.getElementById("packsList");
 const btnSelectAll = document.getElementById("btnSelectAll");
 const btnSelectNone = document.getElementById("btnSelectNone");
 const btnSaveSettings = document.getElementById("btnSaveSettings");
-  const pointsToWinInput = document.getElementById("pointsToWinInput");
+const pointsToWinInput = document.getElementById("pointsToWinInput");
 
-
+/* Winner overlay */
+const winnerOverlay = document.getElementById("winnerOverlay");
+const winnerTitle = document.getElementById("winnerTitle");
+const winnerSub = document.getElementById("winnerSub");
+const btnCloseWinner = document.getElementById("btnCloseWinner");
+const btnResetAll = document.getElementById("btnResetAll");
+const btnContinue = document.getElementById("btnContinue");
 
 /* ===================== UTILS ===================== */
 const rand = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
 const uid = ()=>"p_"+Math.random().toString(36).slice(2,10);
-
-  function saveSettings(){
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-}
-function loadSettings(){
-  try{
-    const raw = localStorage.getItem(SETTINGS_KEY);
-    if(!raw) return;
-    const data = JSON.parse(raw);
-    if(typeof data.pointsToWin === "number") settings.pointsToWin = data.pointsToWin;
-  }catch(e){}
-}
 
 function savePlayers(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify({players, psychicIndex}));
@@ -599,10 +566,52 @@ function loadPlayers(){
   return false;
 }
 
-/* ===================== CATEGORY UI ===================== */
+function saveSettings(){
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+}
+function loadSettings(){
+  try{
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if(!raw) {
+      // default: tous cochés
+      settings.packsEnabled = Object.fromEntries(Object.keys(CATEGORY_PACKS).map(k=>[k,true]));
+      return;
+    }
+    const data = JSON.parse(raw);
+    if(typeof data.pointsToWin === "number") settings.pointsToWin = data.pointsToWin;
+    if(data.packsEnabled && typeof data.packsEnabled === "object") settings.packsEnabled = data.packsEnabled;
+
+    // garantir toutes les clés
+    for(const k of Object.keys(CATEGORY_PACKS)){
+      if(settings.packsEnabled[k] == null) settings.packsEnabled[k] = true;
+    }
+  }catch(e){
+    settings.packsEnabled = Object.fromEntries(Object.keys(CATEGORY_PACKS).map(k=>[k,true]));
+  }
+}
+
+function enabledItems(){
+  const keys = Object.keys(CATEGORY_PACKS).filter(k => settings.packsEnabled[k]);
+  const list = [];
+  for(const k of keys){
+    list.push(...CATEGORY_PACKS[k].items);
+  }
+  // fallback si tout décoché
+  if(list.length === 0){
+    for(const k of Object.keys(CATEGORY_PACKS)) list.push(...CATEGORY_PACKS[k].items);
+  }
+  return list;
+}
+
+function pickCategory(){
+  const items = enabledItems();
+  return items[rand(0, items.length-1)];
+}
+
 function pickCategoryOnce(){
   currentCategory = pickCategory();
 }
+
 function renderPair(){
   if(!currentCategory){
     pairDiv.innerHTML = `<span class="pill">—</span>`;
@@ -613,68 +622,8 @@ function renderPair(){
 
 /* ===================== DRAW ===================== */
 function pctToAngle(pct){
-  return Math.PI - (pct/100) * Math.PI; // 0% gauche (PI) -> 100% droite (0)
-}
-
-function bandColorForPct(pct){
-  const d = Math.abs(pct - secret);
-  if (d <= Z_GREEN)  return "rgba(34,197,94,.85)";
-  if (d <= Z_ORANGE) return "rgba(245,158,11,.85)";
-  if (d <= Z_RED)    return "rgba(239,68,68,.85)";
-  return null;
-}
-
-function drawScoringBandsSampled(cx, cy, r){
-  const ringR = r - 20;
-  const lw = 40;
-  const step = 0.25;
-
-  const startPct = clamp(secret - Z_RED, 0, 100);
-  const endPct   = clamp(secret + Z_RED, 0, 100);
-
-  ctx.save();
-  ctx.lineWidth = lw;
-  ctx.lineCap = "butt";
-  ctx.lineJoin = "round";
-
-  let currentColor = null;
-  let hasPath = false;
-
-  for(let p = startPct; p <= endPct; p += step){
-    const col = bandColorForPct(p);
-    const a = pctToAngle(p);
-    const x = cx + Math.cos(a) * ringR;
-    const y = cy - Math.sin(a) * ringR;
-
-    if(col !== currentColor){
-      if(hasPath){
-        ctx.stroke();
-        hasPath = false;
-      }
-      currentColor = col;
-      if(currentColor){
-        ctx.strokeStyle = currentColor;
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        hasPath = true;
-      }
-      continue;
-    }
-
-    if(currentColor){
-      if(!hasPath){
-        ctx.strokeStyle = currentColor;
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        hasPath = true;
-      } else {
-        ctx.lineTo(x, y);
-      }
-    }
-  }
-
-  if(hasPath) ctx.stroke();
-  ctx.restore();
+  // 0% = gauche (PI), 100% = droite (0)
+  return Math.PI - (pct/100) * Math.PI;
 }
 
 function drawBaseArc(cx,cy,r){
@@ -686,6 +635,33 @@ function drawBaseArc(cx,cy,r){
   ctx.arc(cx,cy,r,Math.PI,0,false);
   ctx.stroke();
   ctx.restore();
+}
+
+function drawArcBand(cx,cy,r, centerPct, radiusPct, color, lw){
+  const leftPct  = clamp(centerPct - radiusPct, 0, 100);
+  const rightPct = clamp(centerPct + radiusPct, 0, 100);
+  const aLeft  = pctToAngle(leftPct);
+  const aRight = pctToAngle(rightPct);
+
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lw;
+  ctx.lineCap = "butt";
+  ctx.beginPath();
+  // aLeft > aRight, c'est ok: on trace la portion autour du secret
+  ctx.arc(cx, cy, r, aLeft, aRight, false);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawScoringBands(cx,cy,r){
+  const ringR = r - 18;
+  const lw = 40;
+
+  // Dessin du plus large au plus précis
+  drawArcBand(cx,cy,ringR, secret, Z_RED,    "rgba(239,68,68,.28)",  lw);
+  drawArcBand(cx,cy,ringR, secret, Z_ORANGE, "rgba(245,158,11,.32)", lw);
+  drawArcBand(cx,cy,ringR, secret, Z_GREEN,  "rgba(34,197,94,.36)",  lw);
 }
 
 function drawNeedle(pct, color, width, cx,cy,r){
@@ -711,7 +687,7 @@ function drawDial({mode}){
   drawBaseArc(cx,cy,r);
 
   if(mode === "reveal"){
-    drawScoringBandsSampled(cx, cy, r);
+    drawScoringBands(cx,cy,r);
   }
 
   // Center hub
@@ -724,6 +700,7 @@ function drawDial({mode}){
 
   if(mode === "psychic"){
     drawNeedle(secret, "rgba(255,255,255,.90)", 6, cx,cy,r);
+
     const as = pctToAngle(secret);
     ctx.save();
     ctx.fillStyle = "#f97316";
@@ -735,6 +712,7 @@ function drawDial({mode}){
 
   if(mode === "team"){
     drawNeedle(currentNeedle, "rgba(255,255,255,.92)", 6, cx,cy,r);
+
     ctx.save();
     ctx.fillStyle="rgba(255,255,255,.88)";
     ctx.font="900 32px Arial";
@@ -772,6 +750,7 @@ function nextRound(){
   secret = rand(0,100);
   currentNeedle = 50;
   roundScored = false;
+
   pickCategoryOnce();
   phase = "psychic";
   updateUI();
@@ -786,7 +765,6 @@ function getNextTeamPlayer(){
   return null;
 }
 
-/* ===================== UI ===================== */
 function syncSlider(){
   needleSlider.value = String(currentNeedle);
   sliderVal.textContent = String(currentNeedle);
@@ -810,6 +788,29 @@ function renderScores(){
   });
 }
 
+function openWinner(winner){
+  winnerTitle.textContent = "Victoire !";
+  winnerSub.textContent = `${winner.name} gagne avec ${winner.score} points (objectif: ${settings.pointsToWin}).`;
+  winnerOverlay.classList.add("show");
+}
+function closeWinner(){
+  winnerOverlay.classList.remove("show");
+}
+
+function checkVictory(){
+  const target = Number(settings.pointsToWin || 20);
+  if(!Number.isFinite(target) || target <= 0) return null;
+
+  // si plusieurs dépassent, on prend le plus haut
+  let best = null;
+  for(const p of players){
+    if(p.score >= target){
+      if(!best || p.score > best.score) best = p;
+    }
+  }
+  return best;
+}
+
 function updateUI(){
   renderPair();
   renderScores();
@@ -821,14 +822,15 @@ function updateUI(){
 
   if(phase === "setup"){
     turnTitle.textContent = "Wavelength";
-    turnSub.textContent = "Configure les participants puis démarre.";
+    turnSub.textContent = `Objectif: ${settings.pointsToWin} pts — Configure puis démarre.`;
     drawDial({mode:"team"});
-    btn.textContent = players.length ? "Démarrer une manche" : "Nouvelle partie";
+    btn.textContent = "Démarrer une manche";
     btn.onclick = ()=>{
       if(players.length < 2){
         openSetup();
         return;
       }
+      // Psychic aléatoire au tout début
       if(!currentCategory){
         psychicIndex = rand(0, players.length-1);
       }
@@ -882,21 +884,18 @@ function updateUI(){
         if(g == null) continue;
         p.score += pointsForGuess(secret, g);
       }
-      // Vérifie la victoire
-const winner = players.reduce((best, p)=> (p.score > (best?.score ?? -1) ? p : best), null);
-if(winner && winner.score >= (settings.pointsToWin || 20)){
-  alert("Bravo " + winner.name + " ! Tu as gagné avec " + winner.score + " points.");
-  // Option simple: reset scores automatique (ou pas)
-  // players.forEach(p=>p.score=0); savePlayers(); renderScores();
-}
-
       roundScored = true;
       renderScores();
       savePlayers();
+
+      const winner = checkVictory();
+      if(winner){
+        openWinner(winner);
+      }
     }
 
     turnTitle.textContent = "RÉVÉLATION";
-    turnSub.textContent = `Barème autour du secret : vert(4) / orange(2) / rouge(1)`;
+    turnSub.textContent = `Barème: ±${Z_GREEN}(4) / ±${Z_ORANGE}(2) / ±${Z_RED}(1) — Objectif ${settings.pointsToWin} pts`;
     drawDial({mode:"reveal"});
 
     btn.textContent = "Manche suivante (Psychic suivant)";
@@ -908,7 +907,7 @@ if(winner && winner.score >= (settings.pointsToWin || 20)){
   }
 }
 
-/* ===================== TEAM INPUTS ===================== */
+/* ===================== INPUTS: CANVAS DRAG + SLIDER ===================== */
 function pointerToPct(ev){
   const rect = canvas.getBoundingClientRect();
   const x = clamp((ev.clientX - rect.left) / rect.width, 0, 1);
@@ -944,7 +943,7 @@ needleSlider.addEventListener("input", ()=>{
   drawDial({mode:"team"});
 });
 
-/* ===================== SETUP MODAL ===================== */
+/* ===================== PARTICIPANTS MODAL ===================== */
 function openSetup(){
   setupOverlay.classList.add("show");
   hydrateSetupUI();
@@ -952,7 +951,6 @@ function openSetup(){
 function closeSetup(){
   setupOverlay.classList.remove("show");
 }
-
 btnSetup.onclick = openSetup;
 btnCloseSetup.onclick = closeSetup;
 
@@ -1044,7 +1042,6 @@ btnStart.onclick = ()=>{
   savePlayers();
   closeSetup();
   phase = "setup";
-  loadSettings();
   updateUI();
 };
 
@@ -1056,10 +1053,13 @@ function openSettings(){
 function closeSettings(){
   settingsOverlay.classList.remove("show");
 }
+btnSettings.onclick = openSettings;
+btnCloseSettings.onclick = closeSettings;
 
 function renderSettingsUI(){
   pointsToWinInput.value = String(settings.pointsToWin || 20);
-  packsList.innerHTML = "";  
+  packsList.innerHTML = "";
+
   for(const [key, pack] of Object.entries(CATEGORY_PACKS)){
     const row = document.createElement("div");
     row.className = "scoreline";
@@ -1092,9 +1092,6 @@ function renderSettingsUI(){
   }
 }
 
-btnSettings.onclick = openSettings;
-btnCloseSettings.onclick = closeSettings;
-
 btnSelectAll.onclick = ()=>{
   for(const k of Object.keys(CATEGORY_PACKS)) settings.packsEnabled[k] = true;
   renderSettingsUI();
@@ -1106,17 +1103,26 @@ btnSelectNone.onclick = ()=>{
 };
 
 btnSaveSettings.onclick = ()=>{
-  const v = parseInt(pointsToWinInput.value, 10);
-if(!Number.isNaN(v) && v >= 1 && v <= 999){
-  settings.pointsToWin = v;
-}
-const v = parseInt((pointsToWinInput.value || "").trim(), 10);
-if(!Number.isNaN(v) && v >= 1 && v <= 999){
-  settings.pointsToWin = v;
-}
-
+  const v = parseInt((pointsToWinInput.value || "").trim(), 10);
+  if(!Number.isNaN(v) && v >= 1 && v <= 999){
+    settings.pointsToWin = v;
+  }
   saveSettings();
   closeSettings();
+  updateUI();
+};
+
+/* ===================== WINNER MODAL ===================== */
+btnCloseWinner.onclick = closeWinner;
+btnContinue.onclick = ()=>{
+  closeWinner();
+};
+btnResetAll.onclick = ()=>{
+  players.forEach(p=>p.score=0);
+  savePlayers();
+  closeWinner();
+  phase = "setup";
+  updateUI();
 };
 
 /* ===================== RESET SCORES ===================== */
@@ -1141,7 +1147,6 @@ if(!loadPlayers()){
 
 phase = "setup";
 currentCategory = null;
-loadSettings();
 updateUI();
 </script>
 
