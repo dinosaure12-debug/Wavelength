@@ -750,7 +750,7 @@ function renderPair(){
 /* ===================== DRAW ===================== */
 function pctToAngle(pct){
   // 0% = gauche (PI), 100% = droite (0)
-  return Math.PI - (pct/100) * Math.PI;
+  return Math.PI + (pct/100) * Math.PI;
 }
 
 /**
@@ -761,23 +761,16 @@ function drawArcBand(cx,cy,r, centerPct, radiusPct, color, lw){
   const leftPct  = clamp(centerPct - radiusPct, 0, 100);
   const rightPct = clamp(centerPct + radiusPct, 0, 100);
 
-  // pctToAngle: 0% -> PI (gauche), 100% -> 0 (droite)
-  // Donc à gauche l'angle est PLUS GRAND que celui de droite.
-  const aLeft  = pctToAngle(leftPct);   // proche de PI
-  const aRight = pctToAngle(rightPct);  // proche de 0
+  // Angles pour arcs sur la moitié HAUTE
+  const aLeft  = pctToArcAngle(leftPct);   // PI .. 2PI
+  const aRight = pctToArcAngle(rightPct);  // PI .. 2PI (>= aLeft)
 
-  // On veut tracer UNIQUEMENT sur la moitié haute (0..PI)
-  const start = clamp(aLeft,  0, Math.PI);
-  const end   = clamp(aRight, 0, Math.PI);
-
-  // Canvas trace par défaut dans le sens horaire si start > end sur [0..PI]
-  // => on garde start (gauche) -> end (droite)
   ctx.save();
   ctx.strokeStyle = color;
   ctx.lineWidth = lw;
   ctx.lineCap = "butt";
   ctx.beginPath();
-  ctx.arc(cx, cy, r, start, end, false);
+  ctx.arc(cx, cy, r, aLeft, aRight, false); // pas de wrap possible ici
   ctx.stroke();
   ctx.restore();
 }
@@ -791,7 +784,6 @@ function drawScoringBands(cx, cy, r){
   drawArcBand(cx, cy, ringR, secret, Z_ORANGE, "rgba(245,158,11,.32)", lw);
   drawArcBand(cx, cy, ringR, secret, Z_GREEN,  "rgba(34,197,94,.36)",  lw);
 }
-
 
 function drawNeedle(pct, color, width, cx,cy,r){
   const a = pctToAngle(pct);
@@ -825,11 +817,11 @@ function drawNeedle(pct, color, width, cx,cy,r){
   ctx.lineWidth=60;
   ctx.lineCap="round";
   ctx.beginPath();
-  ctx.arc(cx,cy,r,Math.PI,0,false); // demi-cercle haut uniquement
+  ctx.arc(cx, cy, r, Math.PI, Math.PI*2, false); // demi-cercle HAUT (PI -> 2PI)
   ctx.stroke();
   ctx.restore();
 }
-
+  
 function drawDial({mode}){
   ctx.clearRect(0,0,900,520);
   const cx=450, cy=460, r=320;
