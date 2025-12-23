@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Wavelength – Mobile (Solo + Multi Lobby)</title>
+<title>Wavelength – Mobile (Multi Sync)</title>
 
 <style>
 :root{
@@ -116,9 +116,7 @@ button.primary{
   border-color: rgba(249,115,22,.55);
 }
 
-button.ghost{
-  background: rgba(255,255,255,.06);
-}
+button.ghost{ background: rgba(255,255,255,.06); }
 
 .hidden{ display:none; }
 
@@ -178,10 +176,7 @@ button.ghost{
   font-weight: 900;
   color: rgba(255,255,255,.86);
 }
-input[type="range"]{
-  width:100%;
-  accent-color: var(--accent);
-}
+input[type="range"]{ width:100%; accent-color: var(--accent); }
 
 .legend{
   display:flex;
@@ -291,7 +286,7 @@ select:focus, input[type="text"]:focus{
 
   <div class="panel">
     <div class="turn" id="turnTitle">Wavelength</div>
-    <div class="subturn" id="turnSub">Configure les participants, puis lance une manche.</div>
+    <div class="subturn" id="turnSub">Crée une room ou rejoins avec un code.</div>
   </div>
 
   <div class="panel">
@@ -325,14 +320,13 @@ select:focus, input[type="text"]:focus{
   </div>
 
   <div class="panel controls">
-    <button id="btnSetup" class="ghost">Participants</button>
     <button id="btnSettings" class="ghost">Paramètres</button>
-    <button id="actionBtn" class="primary">Nouvelle partie</button>
+    <button id="actionBtn" class="primary">—</button>
   </div>
 
-  <!-- ===== MULTI PANEL (Lobby) ===== -->
+  <!-- ===== MULTI PANEL ===== -->
   <div class="panel">
-    <div style="font-weight:950; font-size:16px; margin-bottom:10px;">Multijoueur (Lobby)</div>
+    <div style="font-weight:950; font-size:16px; margin-bottom:10px;">Multijoueur</div>
 
     <div class="row" style="gap:10px;">
       <button id="btnHost" class="primary" style="flex:1;">Créer une room</button>
@@ -353,60 +347,29 @@ select:focus, input[type="text"]:focus{
       <div class="row" style="justify-content:flex-end;">
         <button id="btnConfirmJoin" class="primary">OK</button>
       </div>
-      <div class="small" style="margin-top:6px;">Astuce : mets le code en MAJUSCULES.</div>
+      <div class="small" style="margin-top:6px;">Le code fait 4 caractères (majuscules).</div>
     </div>
 
     <div id="roomInfo" class="hidden" style="margin-top:12px;">
       <div class="badge">Room : <b id="roomCodeLabel">----</b></div>
       <div class="small" style="margin-top:8px;">Joueurs connectés :</div>
       <div id="lobbyPlayers" style="margin-top:8px; display:flex; flex-direction:column; gap:8px;"></div>
-      <div class="small" style="margin-top:8px;">
-        Pour l’instant : lobby uniquement. Ensuite on synchronise la manche (mot, phase, placements, reveal).
+
+      <div class="small" style="margin-top:10px;">
+        Statut : <b id="roomStatusLabel">—</b>
       </div>
+      <div class="small" style="margin-top:6px;" id="roleLabel">—</div>
     </div>
   </div>
 
   <div class="panel" id="scoresPanel">
     <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
-      <div style="font-weight:950; font-size:16px;">Scores</div>
+      <div style="font-weight:950; font-size:16px;">Scores (room)</div>
       <button id="btnResetScores" class="ghost">Reset scores</button>
     </div>
     <div id="scores" style="margin-top:10px; display:flex; flex-direction:column; gap:8px;"></div>
   </div>
 
-</div>
-
-<!-- ===== Participants overlay ===== -->
-<div id="setupOverlay" class="overlay">
-  <div class="modal">
-    <div class="row" style="justify-content:space-between;">
-      <div>
-        <h2>Participants</h2>
-        <div class="small">Choisis les pseudos et une couleur (barres en reveal).</div>
-      </div>
-      <button id="btnCloseSetup" class="ghost">Fermer</button>
-    </div>
-
-    <div class="row">
-      <div class="field">
-        <label>Nombre de participants</label>
-        <select id="playerCount">
-          <option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Info</label>
-        <div class="small">Tu peux modifier les noms et les couleurs.</div>
-      </div>
-    </div>
-
-    <div id="playersList" class="playersList"></div>
-
-    <div class="row" style="justify-content:flex-end;">
-      <button id="btnRandomPsychic" class="ghost">Psychic aléatoire</button>
-      <button id="btnStart" class="primary">Démarrer</button>
-    </div>
-  </div>
 </div>
 
 <!-- ===== Settings overlay ===== -->
@@ -415,7 +378,7 @@ select:focus, input[type="text"]:focus{
     <div class="row" style="justify-content:space-between;">
       <div>
         <h2>Paramètres</h2>
-        <div class="small">Choisis les packs de catégories utilisés pour tirer un mot.</div>
+        <div class="small">Choisis les packs de catégories utilisés pour tirer une catégorie.</div>
       </div>
       <button id="btnCloseSettings" class="ghost">Fermer</button>
     </div>
@@ -449,8 +412,7 @@ select:focus, input[type="text"]:focus{
       <button id="btnCloseWinner" class="ghost">Fermer</button>
     </div>
     <div class="row" style="justify-content:flex-end;">
-      <button id="btnResetAll" class="ghost">Reset scores</button>
-      <button id="btnContinue" class="primary">Continuer</button>
+      <button id="btnContinue" class="primary">OK</button>
     </div>
   </div>
 </div>
@@ -467,7 +429,6 @@ window.addEventListener("error", function (e) {
     <small>${e.filename}:${e.lineno}</small>
   `;
 });
-
 window.addEventListener("unhandledrejection", function (e) {
   const box = document.getElementById("errBox");
   if (!box) return;
@@ -478,15 +439,13 @@ window.addEventListener("unhandledrejection", function (e) {
   `;
 });
 
-/* ================= FIREBASE (CDN) =================
-   Important: avec GitHub Pages, on utilise les modules CDN, pas "npm install".
-*/
+/* ================= FIREBASE (CDN) ================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
   getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-// === Mets TON config Firebase ici (celle que tu m'as envoyée) ===
+/* ======= TON CONFIG FIREBASE ======= */
 const firebaseConfig = {
   apiKey: "AIzaSyB2bxTrr3nT_p20hEp7j2DFR3ptWtDPXP4",
   authDomain: "wavelength-3728d.firebaseapp.com",
@@ -501,52 +460,22 @@ const db = getFirestore(app);
 
 /* ===================== CATEGORY PACKS ===================== */
 const CATEGORY_PACKS = {
-  table: {
-    label: "Autour de la table",
-    items: [
-      "quelqu’un de radin","quelqu’un de drôle","quelqu’un de susceptible","quelqu’un d’organisé",
-      "quelqu’un de retardataire","quelqu’un de chill","quelqu’un de compétitif","quelqu’un de têtu",
-      "quelqu’un de diplomate","quelqu’un de bordélique","quelqu’un de chanceux","quelqu’un de malchanceux"
-    ]
-  },
-  objets: {
-    label: "Objets",
-    items: [
-      "un objet de cuisine","un gadget","un truc qui fait du bruit","un objet de daron",
-      "une chaussure","une voiture","une console","un moyen de locomotion","un objet dangereux"
-    ]
-  },
-  bouffe: {
-    label: "Bouffe",
-    items: ["un truc pour une raclette","un fromage","un burger","un plat","un dessert","une boisson","une viennoiserie","un truc de fête"]
-  },
-  pop: {
-    label: "Pop culture",
-    items: [
-      "un rappeur","un acteur","un mème","un jeu vidéo","un streamer","une série","un anime","un super-héros",
-      "un clip","un banger","un blockbuster","un sportif","un auteur","un politique","un influenceur"
-    ]
-  },
-  lieux: {
-    label: "Lieux",
-    items: ["un aéroport","une plage","un camping","un centre commercial","un métro","un stade","une boîte de nuit","un pays"]
-  },
-  marques: {
-    label: "Marques",
-    items: ["une marque de streetwear","une marque de téléphone","une marque de voiture","un studio de jeu vidéo","une marque tech","une marque de boisson"]
-  },
-  metiers: {
-    label: "Jobs et vie adulte",
-    items: ["un métier","un type de collègue","un type de client","un type de patron","une paye"]
-  },
-  internet: {
-    label: "Réseaux sociaux et internet",
-    items: ["une appli","un réseau social","une trend","une notification","une vidéo YouTube"]
-  },
-  delires: {
-    label: "Délires et situations absurdes",
-    items: ["un super-pouvoir","une catastrophe","une peur","un truc illégal"]
-  }
+  table: { label:"Autour de la table", items:[
+    "quelqu’un de radin","quelqu’un de drôle","quelqu’un de susceptible","quelqu’un d’organisé",
+    "quelqu’un de retardataire","quelqu’un de chill","quelqu’un de compétitif","quelqu’un de têtu",
+    "quelqu’un de diplomate","quelqu’un de bordélique","quelqu’un de chanceux","quelqu’un de malchanceux"
+  ]},
+  objets: { label:"Objets", items:[
+    "un objet de cuisine","un gadget","un truc qui fait du bruit","un objet de daron",
+    "une chaussure","une voiture","une console","un moyen de locomotion","un objet dangereux"
+  ]},
+  bouffe: { label:"Bouffe", items:["un truc pour une raclette","un fromage","un burger","un plat","un dessert","une boisson","une viennoiserie","un truc de fête"]},
+  pop: { label:"Pop culture", items:["un rappeur","un acteur","un mème","un jeu vidéo","un streamer","une série","un anime","un super-héros","un clip","un banger","un blockbuster","un sportif","un auteur","un politique","un influenceur"]},
+  lieux: { label:"Lieux", items:["un aéroport","une plage","un camping","un centre commercial","un métro","un stade","une boîte de nuit","un pays"]},
+  marques: { label:"Marques", items:["une marque de streetwear","une marque de téléphone","une marque de voiture","un studio de jeu vidéo","une marque tech","une marque de boisson"]},
+  metiers: { label:"Jobs et vie adulte", items:["un métier","un type de collègue","un type de client","un type de patron","une paye"]},
+  internet: { label:"Réseaux sociaux et internet", items:["une appli","un réseau social","une trend","une notification","une vidéo YouTube"]},
+  delires: { label:"Délires et situations absurdes", items:["un super-pouvoir","une catastrophe","une peur","un truc illégal"]}
 };
 
 /* ===================== COLORS ===================== */
@@ -561,11 +490,10 @@ const COLOR_CHOICES = [
   {label:"Violet pop",      value:"#7C4DFF"},
 ];
 
-/* ===================== SCORING ZONES ===================== */
+/* ===================== SCORING ===================== */
 const Z_GREEN  = 5;   // ±5 -> 4 pts
 const Z_ORANGE = 7;   // ±7 -> 2 pts
 const Z_RED    = 11;  // ±11 -> 1 pt
-
 function pointsForGuess(secret, guess){
   const d = Math.abs(guess - secret);
   if(d <= Z_GREEN) return 4;
@@ -574,26 +502,63 @@ function pointsForGuess(secret, guess){
   return 0;
 }
 
-/* ===================== STORAGE ===================== */
-const STORAGE_KEY  = "wl_mobile_players_v3";
+/* ===================== SETTINGS (LOCAL) ===================== */
 const SETTINGS_KEY = "wl_mobile_settings_v2";
+let settings = { pointsToWin: 20, packsEnabled: {} };
 
-/* ===================== STATE ===================== */
-let players = []; // {id,name,color,score}
-let psychicIndex = 0;
+function saveSettings(){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
+function loadSettings(){
+  try{
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if(!raw){
+      settings.packsEnabled = Object.fromEntries(Object.keys(CATEGORY_PACKS).map(k=>[k,true]));
+      return;
+    }
+    const data = JSON.parse(raw);
+    if(typeof data.pointsToWin === "number") settings.pointsToWin = data.pointsToWin;
+    if(data.packsEnabled && typeof data.packsEnabled === "object") settings.packsEnabled = data.packsEnabled;
+    for(const k of Object.keys(CATEGORY_PACKS)){
+      if(settings.packsEnabled[k] == null) settings.packsEnabled[k] = true;
+    }
+  }catch(e){
+    settings.packsEnabled = Object.fromEntries(Object.keys(CATEGORY_PACKS).map(k=>[k,true]));
+  }
+}
+function enabledItems(){
+  const keys = Object.keys(CATEGORY_PACKS).filter(k => settings.packsEnabled[k]);
+  const list = [];
+  for(const k of keys) list.push(...CATEGORY_PACKS[k].items);
+  if(list.length === 0){
+    for(const k of Object.keys(CATEGORY_PACKS)) list.push(...CATEGORY_PACKS[k].items);
+  }
+  return list;
+}
+const rand = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+function pickCategory(){ const items = enabledItems(); return items[rand(0, items.length-1)]; }
 
-let phase = "setup"; // setup | psychic | team | reveal
-let currentCategory = null;
+/* ===================== MULTI STATE ===================== */
+let roomCode = null;
+let myId = null;
+let isHost = false;
+let roomData = null; // snapshot data
 
-let secret = 0;
-let guesses = {};   // { playerId: value }
-let currentNeedle = 50;
-let roundScored = false;
-
-let settings = {
-  pointsToWin: 20,
-  packsEnabled: {} // key: boolean
-};
+function getOrCreateMyId(){
+  const k = "wl_myId_v1";
+  let v = localStorage.getItem(k);
+  if(!v){
+    v = "p_" + Math.random().toString(36).slice(2,10);
+    localStorage.setItem(k, v);
+  }
+  return v;
+}
+function generateRoomCode(){
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let out = "";
+  for(let i=0;i<4;i++) out += chars[Math.floor(Math.random()*chars.length)];
+  return out;
+}
+function now(){ return Date.now(); }
 
 /* ===================== DOM ===================== */
 const canvas = document.getElementById("canvas");
@@ -603,9 +568,8 @@ const turnTitle = document.getElementById("turnTitle");
 const turnSub   = document.getElementById("turnSub");
 const pairDiv   = document.getElementById("pair");
 
-const btnSetup  = document.getElementById("btnSetup");
 const btnSettings = document.getElementById("btnSettings");
-const btn       = document.getElementById("actionBtn");
+const btn = document.getElementById("actionBtn");
 
 const sliderWrap = document.getElementById("sliderWrap");
 const needleSlider = document.getElementById("needleSlider");
@@ -617,32 +581,7 @@ const revealNote = document.getElementById("revealNote");
 const scoresDiv = document.getElementById("scores");
 const btnResetScores = document.getElementById("btnResetScores");
 
-/* Participants overlay */
-const setupOverlay = document.getElementById("setupOverlay");
-const btnCloseSetup = document.getElementById("btnCloseSetup");
-const playerCount = document.getElementById("playerCount");
-const playersList = document.getElementById("playersList");
-const btnRandomPsychic = document.getElementById("btnRandomPsychic");
-const btnStart = document.getElementById("btnStart");
-
-/* Settings overlay */
-const settingsOverlay = document.getElementById("settingsOverlay");
-const btnCloseSettings = document.getElementById("btnCloseSettings");
-const packsList = document.getElementById("packsList");
-const btnSelectAll = document.getElementById("btnSelectAll");
-const btnSelectNone = document.getElementById("btnSelectNone");
-const btnSaveSettings = document.getElementById("btnSaveSettings");
-const pointsToWinInput = document.getElementById("pointsToWinInput");
-
-/* Winner overlay */
-const winnerOverlay = document.getElementById("winnerOverlay");
-const winnerTitle = document.getElementById("winnerTitle");
-const winnerSub = document.getElementById("winnerSub");
-const btnCloseWinner = document.getElementById("btnCloseWinner");
-const btnResetAll = document.getElementById("btnResetAll");
-const btnContinue = document.getElementById("btnContinue");
-
-/* MULTI DOM */
+/* Multi DOM */
 const btnHost = document.getElementById("btnHost");
 const btnJoin = document.getElementById("btnJoin");
 const multiBox = document.getElementById("multiBox");
@@ -652,136 +591,66 @@ const btnConfirmJoin = document.getElementById("btnConfirmJoin");
 const roomInfo = document.getElementById("roomInfo");
 const roomCodeLabel = document.getElementById("roomCodeLabel");
 const lobbyPlayers = document.getElementById("lobbyPlayers");
+const roomStatusLabel = document.getElementById("roomStatusLabel");
+const roleLabel = document.getElementById("roleLabel");
 
-/* ===================== UTILS ===================== */
-const rand = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
-const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
-const uid = ()=>"p_"+Math.random().toString(36).slice(2,10);
+/* Settings modal DOM */
+const settingsOverlay = document.getElementById("settingsOverlay");
+const btnCloseSettings = document.getElementById("btnCloseSettings");
+const packsList = document.getElementById("packsList");
+const btnSelectAll = document.getElementById("btnSelectAll");
+const btnSelectNone = document.getElementById("btnSelectNone");
+const btnSaveSettings = document.getElementById("btnSaveSettings");
+const pointsToWinInput = document.getElementById("pointsToWinInput");
 
-function savePlayers(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({players, psychicIndex}));
-}
-function loadPlayers(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw) return false;
-    const data = JSON.parse(raw);
-    if(Array.isArray(data.players) && data.players.length>=2){
-      players = data.players.map(p=>({
-        id: p.id || uid(),
-        name: (p.name||"Joueur").slice(0,14),
-        color: p.color || COLOR_CHOICES[0].value,
-        score: Number(p.score||0)
-      }));
-      psychicIndex = Number.isInteger(data.psychicIndex) ? data.psychicIndex : 0;
-      psychicIndex = clamp(psychicIndex, 0, players.length-1);
-      return true;
-    }
-  }catch(e){}
-  return false;
-}
+/* Winner modal DOM */
+const winnerOverlay = document.getElementById("winnerOverlay");
+const winnerTitle = document.getElementById("winnerTitle");
+const winnerSub = document.getElementById("winnerSub");
+const btnCloseWinner = document.getElementById("btnCloseWinner");
+const btnContinue = document.getElementById("btnContinue");
 
-function saveSettings(){
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-}
-function loadSettings(){
-  try{
-    const raw = localStorage.getItem(SETTINGS_KEY);
-    if(!raw) {
-      settings.packsEnabled = Object.fromEntries(Object.keys(CATEGORY_PACKS).map(k=>[k,true]));
-      return;
-    }
-    const data = JSON.parse(raw);
-    if(typeof data.pointsToWin === "number") settings.pointsToWin = data.pointsToWin;
-    if(data.packsEnabled && typeof data.packsEnabled === "object") settings.packsEnabled = data.packsEnabled;
-
-    for(const k of Object.keys(CATEGORY_PACKS)){
-      if(settings.packsEnabled[k] == null) settings.packsEnabled[k] = true;
-    }
-  }catch(e){
-    settings.packsEnabled = Object.fromEntries(Object.keys(CATEGORY_PACKS).map(k=>[k,true]));
-  }
-}
-
-function enabledItems(){
-  const keys = Object.keys(CATEGORY_PACKS).filter(k => settings.packsEnabled[k]);
-  const list = [];
-  for(const k of keys) list.push(...CATEGORY_PACKS[k].items);
-
-  if(list.length === 0){
-    for(const k of Object.keys(CATEGORY_PACKS)) list.push(...CATEGORY_PACKS[k].items);
-  }
-  return list;
-}
-
-function pickCategory(){
-  const items = enabledItems();
-  return items[rand(0, items.length-1)];
-}
-function pickCategoryOnce(){
-  currentCategory = pickCategory();
-}
-function renderPair(){
-  if(!currentCategory){
-    pairDiv.innerHTML = `<span class="pill">—</span>`;
-    return;
-  }
-  pairDiv.innerHTML = `<span class="pill">${currentCategory}</span>`;
-}
-
-/* ===================== DRAW (CORRIGÉ) ===================== */
+/* ===================== DRAW ===================== */
 function pctToAngle(pct){
-  // 0% = gauche (PI), 100% = droite (0) -> demi-cercle HAUT
+  // 0% = gauche (PI), 100% = droite (0) -> demi-cercle haut
   return Math.PI - (pct/100) * Math.PI;
 }
-
 function drawBaseArc(cx,cy,r){
   ctx.save();
   ctx.strokeStyle="rgba(255,255,255,.18)";
   ctx.lineWidth=60;
   ctx.lineCap="round";
   ctx.beginPath();
-  ctx.arc(cx,cy,r,Math.PI,0,false); // demi-cercle haut
+  ctx.arc(cx,cy,r,Math.PI,0,false);
   ctx.stroke();
   ctx.restore();
 }
-
-/**
- * Bande autour de centerPct, sans wrap, et on CLIP sur la moitié haute.
- */
 function drawArcBand(cx,cy,r, centerPct, radiusPct, color, lw){
   const leftPct  = clamp(centerPct - radiusPct, 0, 100);
   const rightPct = clamp(centerPct + radiusPct, 0, 100);
-
-  const aLeft  = pctToAngle(leftPct);   // proche de PI
-  const aRight = pctToAngle(rightPct);  // proche de 0
+  const aLeft  = pctToAngle(leftPct);
+  const aRight = pctToAngle(rightPct);
 
   ctx.save();
-  // clip moitié haute (empêche d'apparaître en bas)
   ctx.beginPath();
-  ctx.rect(0, 0, 900, cy); // tout ce qui est au-dessus du centre
+  ctx.rect(0, 0, 900, cy); // clip moitié haute
   ctx.clip();
 
   ctx.strokeStyle = color;
   ctx.lineWidth = lw;
   ctx.lineCap = "butt";
   ctx.beginPath();
-  // start = gauche (plus grand) -> end = droite (plus petit) : pas de wrap
   ctx.arc(cx, cy, r, aLeft, aRight, false);
   ctx.stroke();
   ctx.restore();
 }
-
-function drawScoringBands(cx, cy, r){
+function drawScoringBands(cx, cy, r, secret){
   const ringR = r - 18;
   const lw = 40;
-
-  // rouge -> orange -> vert (du plus large au plus précis)
   drawArcBand(cx, cy, ringR, secret, Z_RED,    "rgba(239,68,68,.28)",  lw);
   drawArcBand(cx, cy, ringR, secret, Z_ORANGE, "rgba(245,158,11,.32)", lw);
   drawArcBand(cx, cy, ringR, secret, Z_GREEN,  "rgba(34,197,94,.36)",  lw);
 }
-
 function drawNeedle(pct, color, width, cx,cy,r){
   const a = pctToAngle(pct);
   const nx = cx + Math.cos(a)*r;
@@ -790,7 +659,6 @@ function drawNeedle(pct, color, width, cx,cy,r){
   ctx.save();
   ctx.lineCap="round";
 
-  // contour sombre
   ctx.strokeStyle = "rgba(0,0,0,.55)";
   ctx.lineWidth = width + 3;
   ctx.beginPath();
@@ -798,7 +666,6 @@ function drawNeedle(pct, color, width, cx,cy,r){
   ctx.lineTo(nx,ny);
   ctx.stroke();
 
-  // couleur
   ctx.strokeStyle = color;
   ctx.lineWidth = width;
   ctx.beginPath();
@@ -808,18 +675,16 @@ function drawNeedle(pct, color, width, cx,cy,r){
 
   ctx.restore();
 }
-
-function drawDial({mode}){
+function drawDial({mode, secret, guesses, playersMap, psychicId, currentNeedle}){
   ctx.clearRect(0,0,900,520);
   const cx=450, cy=460, r=320;
 
   drawBaseArc(cx,cy,r);
 
   if(mode === "reveal"){
-    drawScoringBands(cx,cy,r);
+    drawScoringBands(cx,cy,r, secret);
   }
 
-  // hub
   ctx.save();
   ctx.fillStyle="rgba(255,255,255,.90)";
   ctx.beginPath();
@@ -827,16 +692,9 @@ function drawDial({mode}){
   ctx.fill();
   ctx.restore();
 
-  if(mode === "psychic"){
-    drawNeedle(secret, "rgba(255,255,255,.90)", 6, cx,cy,r);
-
-    const as = pctToAngle(secret);
-    ctx.save();
-    ctx.fillStyle = "#f97316";
-    ctx.beginPath();
-    ctx.arc(cx+Math.cos(as)*r, cy-Math.sin(as)*r, 8, 0, Math.PI*2);
-    ctx.fill();
-    ctx.restore();
+  if(mode === "psychic_word"){
+    // on ne montre PAS le secret, juste un marqueur neutre
+    drawNeedle(50, "rgba(255,255,255,.65)", 4, cx,cy,r);
   }
 
   if(mode === "team"){
@@ -856,11 +714,12 @@ function drawDial({mode}){
   if(mode === "reveal"){
     drawNeedle(secret, "rgba(255,255,255,.95)", 11, cx,cy,r);
 
-    for(const p of players){
-      if(p.id === players[psychicIndex].id) continue;
-      const g = guesses[p.id];
-      if(g == null) continue;
-      drawNeedle(g, p.color, 5, cx,cy,r);
+    for(const [pid, g] of Object.entries(guesses || {})){
+      if(pid === psychicId) continue;
+      const p = playersMap?.[pid];
+      if(p && typeof g === "number"){
+        drawNeedle(g, p.color || "#999", 5, cx,cy,r);
+      }
     }
 
     const as = pctToAngle(secret);
@@ -873,165 +732,431 @@ function drawDial({mode}){
   }
 }
 
-/* ===================== GAME FLOW (SOLO) ===================== */
-function nextRound(){
-  guesses = {};
-  secret = rand(0,100);
-  currentNeedle = 50;
-  roundScored = false;
-
-  pickCategoryOnce();
-  phase = "psychic";
-  updateUI();
-}
-
-function getNextTeamPlayer(){
-  const psychicId = players[psychicIndex]?.id;
-  for(const p of players){
-    if(p.id === psychicId) continue;
-    if(guesses[p.id] == null) return p;
+/* ===================== UI HELPERS ===================== */
+function setPair(category, word){
+  if(!category && !word){
+    pairDiv.innerHTML = `<span class="pill">—</span>`;
+    return;
   }
-  return null;
+  if(category && word){
+    pairDiv.innerHTML = `<span class="pill">${category}</span><span class="pill">${word}</span>`;
+    return;
+  }
+  pairDiv.innerHTML = `<span class="pill">${category || word}</span>`;
 }
+
+function openWinner(name, score, target){
+  winnerTitle.textContent = "Victoire !";
+  winnerSub.textContent = `${name} gagne avec ${score} points (objectif: ${target}).`;
+  winnerOverlay.classList.add("show");
+}
+function closeWinner(){ winnerOverlay.classList.remove("show"); }
+
+/* ===================== ROOM RENDER ===================== */
+function renderLobby(playersMap, hostId){
+  lobbyPlayers.innerHTML = "";
+  const entries = Object.entries(playersMap || {});
+  if(entries.length === 0){
+    lobbyPlayers.innerHTML = `<div class="small">Personne dans la room.</div>`;
+    return;
+  }
+  // tri par joinedAt si présent
+  entries.sort((a,b)=> (a[1]?.joinedAt||0) - (b[1]?.joinedAt||0));
+
+  for(const [pid, p] of entries){
+    const line = document.createElement("div");
+    line.className = "scoreline";
+    line.innerHTML = `
+      <div class="scoreLeft">
+        <span class="colorDot" style="background:${p.color || "#999"}"></span>
+        <span class="nameText">
+          ${(p.name || pid)}
+          ${pid === hostId ? " (Host)" : ""}
+          ${pid === myId ? " (Toi)" : ""}
+        </span>
+      </div>
+      <div class="scorePts">${p.score ?? 0} pts</div>
+    `;
+    lobbyPlayers.appendChild(line);
+  }
+}
+
+function renderScores(playersMap, psychicId){
+  scoresDiv.innerHTML = "";
+  const entries = Object.entries(playersMap || {});
+  entries.sort((a,b)=> (a[1]?.score||0) < (b[1]?.score||0) ? 1 : -1);
+
+  for(const [pid, p] of entries){
+    const line = document.createElement("div");
+    line.className = "scoreline";
+    line.innerHTML = `
+      <div class="scoreLeft">
+        <span class="colorDot" style="background:${p.color || "#999"}"></span>
+        <span class="nameText">
+          ${(p.name || pid)}${pid===psychicId ? " (Psychic)" : ""}
+        </span>
+      </div>
+      <div class="scorePts">${p.score ?? 0} pts</div>
+    `;
+    scoresDiv.appendChild(line);
+  }
+}
+
+/* ===================== ROOM LOGIC ===================== */
+async function createRoom(hostName, hostColor){
+  const code = generateRoomCode();
+  const roomRef = doc(db, "rooms", code);
+
+  const hostId = myId;
+
+  await setDoc(roomRef, {
+    hostId,
+    pointsToWin: settings.pointsToWin || 20,
+    packsEnabled: settings.packsEnabled || {},
+    phase: "lobby",            // lobby | psychic_word | team | reveal
+    psychicId: hostId,
+    category: null,
+    word: null,
+    secret: null,
+    guesses: {},
+    order: [hostId],
+    players: {
+      [hostId]: { name: hostName, color: hostColor, score: 0, joinedAt: now() }
+    },
+    createdAt: now(),
+    updatedAt: now()
+  });
+
+  return code;
+}
+
+async function joinRoom(code, playerName, playerColor){
+  const roomRef = doc(db, "rooms", code);
+  const snap = await getDoc(roomRef);
+  if(!snap.exists()){
+    alert("Room inexistante");
+    return false;
+  }
+
+  const data = snap.data();
+  const order = Array.isArray(data.order) ? data.order.slice() : [];
+  if(!order.includes(myId)) order.push(myId);
+
+  await updateDoc(roomRef, {
+    [`players.${myId}`]: { name: playerName, color: playerColor, score: 0, joinedAt: now() },
+    order: order,
+    updatedAt: now()
+  });
+
+  return true;
+}
+
+function isMyTurnPsychic(d){
+  return d && d.psychicId === myId;
+}
+function isRoomHost(d){
+  return d && d.hostId === myId;
+}
+
+async function hostStartRound(){
+  if(!roomCode) return;
+  const roomRef = doc(db, "rooms", roomCode);
+  const d = roomData;
+  if(!d) return;
+
+  const cat = pickCategory();
+  const secret = rand(0,100);
+
+  await updateDoc(roomRef, {
+    phase: "psychic_word",
+    category: cat,
+    word: null,
+    secret: secret,
+    guesses: {}, // reset
+    updatedAt: now()
+  });
+}
+
+async function psychicSubmitWord(word){
+  if(!roomCode) return;
+  const roomRef = doc(db, "rooms", roomCode);
+
+  const cleaned = (word || "").trim().slice(0,40);
+  if(!cleaned){
+    alert("Écris un mot avant de valider.");
+    return;
+  }
+
+  // le psychic écrit le mot -> phase team
+  await updateDoc(roomRef, {
+    word: cleaned,
+    phase: "team",
+    updatedAt: now()
+  });
+}
+
+async function playerSubmitGuess(val){
+  if(!roomCode) return;
+  const roomRef = doc(db, "rooms", roomCode);
+
+  await updateDoc(roomRef, {
+    [`guesses.${myId}`]: Number(val),
+    updatedAt: now()
+  });
+}
+
+function allTeamGuessed(d){
+  const playersMap = d.players || {};
+  const ids = Object.keys(playersMap);
+  const psychicId = d.psychicId;
+  const teamIds = ids.filter(id => id !== psychicId);
+  const guesses = d.guesses || {};
+  return teamIds.every(id => typeof guesses[id] === "number");
+}
+
+async function hostComputeRevealAndScore(){
+  const d = roomData;
+  if(!d || !roomCode) return;
+  if(d.phase !== "team") return;
+  if(!allTeamGuessed(d)) return;
+
+  const roomRef = doc(db, "rooms", roomCode);
+  const playersMap = d.players || {};
+  const guesses = d.guesses || {};
+  const secret = d.secret;
+
+  // calc points pour chaque joueur non-psychic
+  const updates = {};
+  for(const [pid, p] of Object.entries(playersMap)){
+    if(pid === d.psychicId) continue;
+    const g = guesses[pid];
+    if(typeof g !== "number") continue;
+    const add = pointsForGuess(secret, g);
+    const newScore = (p.score || 0) + add;
+    updates[`players.${pid}.score`] = newScore;
+  }
+
+  // reveal
+  updates["phase"] = "reveal";
+  updates["updatedAt"] = now();
+
+  await updateDoc(roomRef, updates);
+
+  // check victory (host only)
+  const target = Number(d.pointsToWin || 20);
+  if(Number.isFinite(target) && target > 0){
+    let bestId = null, bestScore = -1;
+    for(const [pid, p] of Object.entries(playersMap)){
+      const s = (updates[`players.${pid}.score`] != null) ? updates[`players.${pid}.score`] : (p.score || 0);
+      if(s >= target && s > bestScore){
+        bestScore = s;
+        bestId = pid;
+      }
+    }
+    if(bestId){
+      const name = playersMap[bestId]?.name || bestId;
+      // on ne stocke pas "winner" pour l'instant, on affiche côté client via snapshot après MAJ
+      // (simple)
+    }
+  }
+}
+
+async function hostNextRound(){
+  if(!roomCode) return;
+  const d = roomData;
+  if(!d) return;
+
+  const order = Array.isArray(d.order) ? d.order : [];
+  if(order.length < 2){
+    alert("Il faut au moins 2 joueurs.");
+    return;
+  }
+
+  const idx = Math.max(0, order.indexOf(d.psychicId));
+  const nextPsychic = order[(idx + 1) % order.length];
+
+  const roomRef = doc(db, "rooms", roomCode);
+
+  await updateDoc(roomRef, {
+    psychicId: nextPsychic,
+    phase: "lobby",
+    category: null,
+    word: null,
+    secret: null,
+    guesses: {},
+    updatedAt: now()
+  });
+}
+
+/* ===================== LISTEN ===================== */
+function listenRoom(code){
+  const roomRef = doc(db, "rooms", code);
+  onSnapshot(roomRef, async (snap)=>{
+    if(!snap.exists()) return;
+    roomData = snap.data();
+
+    // render lobby UI
+    roomCodeLabel.textContent = code;
+    roomInfo.classList.remove("hidden");
+
+    renderLobby(roomData.players || {}, roomData.hostId);
+    renderScores(roomData.players || {}, roomData.psychicId);
+
+    // role labels
+    roomStatusLabel.textContent = roomData.phase || "—";
+    roleLabel.textContent =
+      (isRoomHost(roomData) ? "Tu es HOST." : "Tu es JOUEUR.")
+      + " "
+      + (isMyTurnPsychic(roomData) ? "Tu es PSYCHIC." : "");
+
+    // Partie visuelle
+    const phase = roomData.phase || "lobby";
+    const category = roomData.category;
+    const word = roomData.word;
+
+    // affichage catégorie + mot pour tout le monde
+    if(phase === "lobby"){
+      setPair("En attente…", "Crée / rejoins une room");
+      sliderWrap.classList.add("hidden");
+      legendWrap.classList.add("hidden");
+      revealNote.classList.add("hidden");
+      drawDial({mode:"psychic_word", secret:50, guesses:{}, playersMap:{}, psychicId:roomData.psychicId, currentNeedle:50});
+    } else if(phase === "psychic_word"){
+      setPair(category || "Catégorie", isMyTurnPsychic(roomData) ? "Écris le mot…" : "En attente du Psychic…");
+      sliderWrap.classList.add("hidden");
+      legendWrap.classList.add("hidden");
+      revealNote.classList.add("hidden");
+      drawDial({mode:"psychic_word", secret:50, guesses:{}, playersMap:{}, psychicId:roomData.psychicId, currentNeedle:50});
+    } else if(phase === "team"){
+      setPair(category || "Catégorie", word || "Mot");
+      legendWrap.classList.add("hidden");
+      revealNote.classList.add("hidden");
+      // le slider seulement pour NON-psychic
+      sliderWrap.classList.toggle("hidden", isMyTurnPsychic(roomData));
+      drawDial({
+        mode:"team",
+        secret:roomData.secret,
+        guesses:roomData.guesses || {},
+        playersMap:roomData.players || {},
+        psychicId:roomData.psychicId,
+        currentNeedle: currentNeedle
+      });
+
+      // si host: check auto reveal
+      if(isRoomHost(roomData)){
+        await hostComputeRevealAndScore();
+      }
+    } else if(phase === "reveal"){
+      setPair(category || "Catégorie", word || "Mot");
+      sliderWrap.classList.add("hidden");
+      legendWrap.classList.remove("hidden");
+      revealNote.classList.remove("hidden");
+      drawDial({
+        mode:"reveal",
+        secret:roomData.secret,
+        guesses:roomData.guesses || {},
+        playersMap:roomData.players || {},
+        psychicId:roomData.psychicId,
+        currentNeedle:50
+      });
+
+      // victoire (affichage client)
+      const target = Number(roomData.pointsToWin || 20);
+      if(Number.isFinite(target) && target > 0){
+        let best = null;
+        for(const [pid, p] of Object.entries(roomData.players || {})){
+          const s = p.score || 0;
+          if(s >= target && (!best || s > best.score)){
+            best = {pid, name:p.name||pid, score:s};
+          }
+        }
+        if(best){
+          openWinner(best.name, best.score, target);
+        }
+      }
+    }
+
+    // Action button
+    updateActionButtonFromRoom();
+  });
+}
+
+/* ===================== ACTION BUTTON (multi) ===================== */
+function updateActionButtonFromRoom(){
+  const d = roomData;
+  if(!d){
+    btn.textContent = "—";
+    btn.onclick = null;
+    return;
+  }
+
+  const phase = d.phase || "lobby";
+
+  // lobby
+  if(phase === "lobby"){
+    if(isRoomHost(d)){
+      btn.textContent = "Lancer la manche";
+      btn.onclick = hostStartRound;
+    }else{
+      btn.textContent = "En attente (host lance)";
+      btn.onclick = null;
+    }
+    return;
+  }
+
+  // psychic_word
+  if(phase === "psychic_word"){
+    if(isMyTurnPsychic(d)){
+      btn.textContent = "Valider le mot";
+      btn.onclick = async ()=>{
+        const w = prompt("Mot choisi par le Psychic (visible à tous) :", "");
+        if(w == null) return;
+        await psychicSubmitWord(w);
+      };
+    } else {
+      btn.textContent = "En attente du Psychic…";
+      btn.onclick = null;
+    }
+    return;
+  }
+
+  // team
+  if(phase === "team"){
+    if(isMyTurnPsychic(d)){
+      btn.textContent = "Psychic : observe";
+      btn.onclick = null;
+    } else {
+      const already = d.guesses && typeof d.guesses[myId] === "number";
+      btn.textContent = already ? "Placement envoyé" : "Valider mon placement";
+      btn.onclick = async ()=>{
+        if(already) return;
+        await playerSubmitGuess(currentNeedle);
+      };
+    }
+    return;
+  }
+
+  // reveal
+  if(phase === "reveal"){
+    if(isRoomHost(d)){
+      btn.textContent = "Manche suivante";
+      btn.onclick = hostNextRound;
+    } else {
+      btn.textContent = "En attente (host)";
+      btn.onclick = null;
+    }
+    return;
+  }
+}
+
+/* ===================== INPUTS: CANVAS DRAG + SLIDER ===================== */
+let currentNeedle = 50;
 
 function syncSlider(){
   needleSlider.value = String(currentNeedle);
   sliderVal.textContent = String(currentNeedle);
 }
 
-function renderScores(){
-  scoresDiv.innerHTML = "";
-  const psychicId = players[psychicIndex]?.id;
-
-  players.forEach(p=>{
-    const line = document.createElement("div");
-    line.className = "scoreline";
-    line.innerHTML = `
-      <div class="scoreLeft">
-        <span class="colorDot" style="background:${p.color}"></span>
-        <span class="nameText">${p.name}${p.id===psychicId ? " (Psychic)" : ""}</span>
-      </div>
-      <div class="scorePts">${p.score} pts</div>
-    `;
-    scoresDiv.appendChild(line);
-  });
-}
-
-function openWinner(winner){
-  winnerTitle.textContent = "Victoire !";
-  winnerSub.textContent = `${winner.name} gagne avec ${winner.score} points (objectif: ${settings.pointsToWin}).`;
-  winnerOverlay.classList.add("show");
-}
-function closeWinner(){
-  winnerOverlay.classList.remove("show");
-}
-function checkVictory(){
-  const target = Number(settings.pointsToWin || 20);
-  if(!Number.isFinite(target) || target <= 0) return null;
-
-  let best = null;
-  for(const p of players){
-    if(p.score >= target){
-      if(!best || p.score > best.score) best = p;
-    }
-  }
-  return best;
-}
-
-function updateUI(){
-  renderPair();
-  renderScores();
-  savePlayers();
-
-  sliderWrap.classList.toggle("hidden", phase !== "team");
-  legendWrap.classList.toggle("hidden", phase !== "reveal");
-  revealNote.classList.toggle("hidden", phase !== "reveal");
-
-  if(phase === "setup"){
-    turnTitle.textContent = "Wavelength";
-    turnSub.textContent = `Objectif: ${settings.pointsToWin} pts — Configure puis démarre.`;
-    drawDial({mode:"team"});
-    btn.textContent = "Démarrer une manche";
-    btn.onclick = ()=>{
-      if(players.length < 2){
-        openSetup();
-        return;
-      }
-      if(!currentCategory){
-        psychicIndex = rand(0, players.length-1);
-      }
-      nextRound();
-    };
-    return;
-  }
-
-  if(phase === "psychic"){
-    const psychic = players[psychicIndex];
-    turnTitle.textContent = "TOUR DU PSYCHIC";
-    turnSub.textContent = `${psychic.name} — Secret: ${secret} (à ne pas dire)`;
-    drawDial({mode:"psychic"});
-    btn.textContent = "Passer à l'équipe";
-    btn.onclick = ()=>{
-      phase = "team";
-      currentNeedle = 50;
-      syncSlider();
-      updateUI();
-    };
-    return;
-  }
-
-  if(phase === "team"){
-    const nextP = getNextTeamPlayer();
-    if(!nextP){
-      phase = "reveal";
-      updateUI();
-      return;
-    }
-    turnTitle.textContent = "TOUR DE L'ÉQUIPE";
-    turnSub.textContent = `${nextP.name} — place ton aiguille puis valide`;
-    syncSlider();
-    drawDial({mode:"team"});
-    btn.textContent = "Valider mon placement";
-    btn.onclick = ()=>{
-      guesses[nextP.id] = currentNeedle;
-      currentNeedle = 50;
-      syncSlider();
-      updateUI();
-    };
-    return;
-  }
-
-  if(phase === "reveal"){
-    if(!roundScored){
-      const psychicId = players[psychicIndex]?.id;
-      for(const p of players){
-        if(p.id === psychicId) continue;
-        const g = guesses[p.id];
-        if(g == null) continue;
-        p.score += pointsForGuess(secret, g);
-      }
-      roundScored = true;
-      renderScores();
-      savePlayers();
-
-      const winner = checkVictory();
-      if(winner) openWinner(winner);
-    }
-
-    turnTitle.textContent = "RÉVÉLATION";
-    turnSub.textContent = `Barème: ±${Z_GREEN}(4) / ±${Z_ORANGE}(2) / ±${Z_RED}(1) — Objectif ${settings.pointsToWin} pts`;
-    drawDial({mode:"reveal"});
-
-    btn.textContent = "Manche suivante (Psychic suivant)";
-    btn.onclick = ()=>{
-      psychicIndex = (psychicIndex + 1) % players.length;
-      nextRound();
-    };
-    return;
-  }
-}
-
-/* ===================== INPUTS: CANVAS DRAG + SLIDER ===================== */
 function pointerToPct(ev){
   const rect = canvas.getBoundingClientRect();
   const x = clamp((ev.clientX - rect.left) / rect.width, 0, 1);
@@ -1039,144 +1164,67 @@ function pointerToPct(ev){
 }
 
 let dragging = false;
-
 canvas.addEventListener("pointerdown", (e)=>{
-  if(phase !== "team") return;
+  // uniquement si phase team ET si pas psychic
+  if(!roomData || roomData.phase !== "team") return;
+  if(isMyTurnPsychic(roomData)) return;
+
   dragging = true;
   canvas.setPointerCapture(e.pointerId);
   currentNeedle = pointerToPct(e);
   syncSlider();
-  drawDial({mode:"team"});
+  drawDial({
+    mode:"team",
+    secret:roomData.secret,
+    guesses:roomData.guesses || {},
+    playersMap:roomData.players || {},
+    psychicId:roomData.psychicId,
+    currentNeedle
+  });
 });
 
 canvas.addEventListener("pointermove", (e)=>{
   if(!dragging) return;
-  if(phase !== "team") return;
+  if(!roomData || roomData.phase !== "team") return;
+  if(isMyTurnPsychic(roomData)) return;
+
   currentNeedle = pointerToPct(e);
   syncSlider();
-  drawDial({mode:"team"});
+  drawDial({
+    mode:"team",
+    secret:roomData.secret,
+    guesses:roomData.guesses || {},
+    playersMap:roomData.players || {},
+    psychicId:roomData.psychicId,
+    currentNeedle
+  });
 });
 
 canvas.addEventListener("pointerup", ()=> dragging=false);
 canvas.addEventListener("pointercancel", ()=> dragging=false);
 
 needleSlider.addEventListener("input", ()=>{
-  if(phase !== "team") return;
+  if(!roomData || roomData.phase !== "team") return;
+  if(isMyTurnPsychic(roomData)) return;
+
   currentNeedle = Number(needleSlider.value);
   sliderVal.textContent = String(currentNeedle);
-  drawDial({mode:"team"});
+  drawDial({
+    mode:"team",
+    secret:roomData.secret,
+    guesses:roomData.guesses || {},
+    playersMap:roomData.players || {},
+    psychicId:roomData.psychicId,
+    currentNeedle
+  });
 });
-
-/* ===================== PARTICIPANTS MODAL ===================== */
-function openSetup(){
-  setupOverlay.classList.add("show");
-  hydrateSetupUI();
-}
-function closeSetup(){
-  setupOverlay.classList.remove("show");
-}
-btnSetup.onclick = openSetup;
-btnCloseSetup.onclick = closeSetup;
-
-function ensurePlayersCount(n){
-  const prev = [...players];
-  players = [];
-  for(let i=0;i<n;i++){
-    const old = prev[i];
-    players.push({
-      id: old?.id || uid(),
-      name: (old?.name || `Joueur ${i+1}`).slice(0,14),
-      color: old?.color || COLOR_CHOICES[i % COLOR_CHOICES.length].value,
-      score: Number(old?.score || 0)
-    });
-  }
-  psychicIndex = clamp(psychicIndex, 0, players.length-1);
-}
-
-function hydrateSetupUI(){
-  const n = Number(playerCount.value || 3);
-  playerCount.value = String(n);
-  ensurePlayersCount(n);
-
-  playersList.innerHTML = "";
-  players.forEach((p)=>{
-    const row = document.createElement("div");
-    row.className = "playerRow";
-
-    const input = document.createElement("input");
-    input.type = "text";
-    input.maxLength = 14;
-    input.value = p.name;
-    input.dataset.pid = p.id;
-
-    const preview = document.createElement("div");
-    preview.className = "colorPreview";
-    preview.style.background = p.color;
-
-    const select = document.createElement("select");
-    select.dataset.pid = p.id;
-    COLOR_CHOICES.forEach(c=>{
-      const opt = document.createElement("option");
-      opt.value = c.value;
-      opt.textContent = c.label;
-      if(c.value === p.color) opt.selected = true;
-      select.appendChild(opt);
-    });
-
-    select.addEventListener("change", ()=>{
-      p.color = select.value;
-      preview.style.background = p.color;
-    });
-
-    row.appendChild(input);
-    row.appendChild(preview);
-    row.appendChild(select);
-    playersList.appendChild(row);
-  });
-}
-
-playerCount.addEventListener("change", hydrateSetupUI);
-
-btnRandomPsychic.onclick = ()=>{
-  if(players.length < 2) return;
-  psychicIndex = rand(0, players.length-1);
-  turnSub.textContent = `Psychic aléatoire prêt : ${players[psychicIndex].name}.`;
-};
-
-btnStart.onclick = ()=>{
-  const inputs = playersList.querySelectorAll('input[data-pid]');
-  inputs.forEach(inp=>{
-    const p = players.find(x=>x.id === inp.dataset.pid);
-    if(!p) return;
-    const v = (inp.value || "").trim();
-    if(v.length) p.name = v.slice(0,14);
-  });
-
-  const selects = playersList.querySelectorAll('select[data-pid]');
-  selects.forEach(sel=>{
-    const p = players.find(x=>x.id === sel.dataset.pid);
-    if(!p) return;
-    p.color = sel.value;
-  });
-
-  if(!currentCategory){
-    psychicIndex = rand(0, players.length-1);
-  }
-
-  savePlayers();
-  closeSetup();
-  phase = "setup";
-  updateUI();
-};
 
 /* ===================== SETTINGS MODAL ===================== */
 function openSettings(){
   settingsOverlay.classList.add("show");
   renderSettingsUI();
 }
-function closeSettings(){
-  settingsOverlay.classList.remove("show");
-}
+function closeSettings(){ settingsOverlay.classList.remove("show"); }
 btnSettings.onclick = openSettings;
 btnCloseSettings.onclick = closeSettings;
 
@@ -1220,146 +1268,55 @@ btnSelectAll.onclick = ()=>{
   for(const k of Object.keys(CATEGORY_PACKS)) settings.packsEnabled[k] = true;
   renderSettingsUI();
 };
-
 btnSelectNone.onclick = ()=>{
   for(const k of Object.keys(CATEGORY_PACKS)) settings.packsEnabled[k] = false;
   renderSettingsUI();
 };
 
-btnSaveSettings.onclick = ()=>{
+btnSaveSettings.onclick = async ()=>{
   const v = parseInt((pointsToWinInput.value || "").trim(), 10);
   if(!Number.isNaN(v) && v >= 1 && v <= 999){
     settings.pointsToWin = v;
   }
   saveSettings();
   closeSettings();
-  updateUI();
+
+  // si tu es host et que tu es déjà en room, on pousse aussi les settings dans la room
+  if(roomCode && roomData && isRoomHost(roomData)){
+    const roomRef = doc(db, "rooms", roomCode);
+    await updateDoc(roomRef, {
+      pointsToWin: settings.pointsToWin,
+      packsEnabled: settings.packsEnabled,
+      updatedAt: now()
+    });
+  }
 };
 
 /* ===================== WINNER MODAL ===================== */
 btnCloseWinner.onclick = closeWinner;
-btnContinue.onclick = ()=> closeWinner();
-btnResetAll.onclick = ()=>{
-  players.forEach(p=>p.score=0);
-  savePlayers();
-  closeWinner();
-  phase = "setup";
-  updateUI();
-};
+btnContinue.onclick = closeWinner;
 
-/* ===================== RESET SCORES ===================== */
-btnResetScores.onclick = ()=>{
-  players.forEach(p=>p.score = 0);
-  savePlayers();
-  renderScores();
-};
-
-/* ===================== MULTI (Lobby) ===================== */
-let roomCode = null;
-let myId = null;
-let isHost = false;
-let roomHostIdCache = null;
-
-function getOrCreateMyId(){
-  const k = "wl_myId_v1";
-  let v = localStorage.getItem(k);
-  if(!v){
-    v = "p_" + Math.random().toString(36).slice(2,10);
-    localStorage.setItem(k, v);
-  }
-  return v;
-}
-
-function generateRoomCode(){
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let out = "";
-  for(let i=0;i<4;i++) out += chars[Math.floor(Math.random()*chars.length)];
-  return out;
-}
-
-function showRoomUI(code){
-  roomCode = code;
-  roomCodeLabel.textContent = code;
-  roomInfo.classList.remove("hidden");
-  multiBox.classList.add("hidden");
-}
-
-function renderLobby(playersMap){
-  lobbyPlayers.innerHTML = "";
-  const entries = Object.entries(playersMap || {});
-  if(entries.length === 0){
-    lobbyPlayers.innerHTML = `<div class="small">Personne dans la room.</div>`;
+/* ===================== RESET SCORES (HOST ONLY) ===================== */
+btnResetScores.onclick = async ()=>{
+  if(!roomCode || !roomData) return;
+  if(!isRoomHost(roomData)){
+    alert("Seul le host peut reset les scores.");
     return;
   }
-
-  for(const [pid, p] of entries){
-    const line = document.createElement("div");
-    line.className = "scoreline";
-    line.innerHTML = `
-      <div class="scoreLeft">
-        <span class="colorDot" style="background:${p.color || "#999"}"></span>
-        <span class="nameText">
-          ${p.name || pid}
-          ${pid === roomHostIdCache ? " (Host)" : ""}
-          ${pid === myId ? " (Toi)" : ""}
-        </span>
-      </div>
-      <div class="scorePts">${p.score ?? 0} pts</div>
-    `;
-    lobbyPlayers.appendChild(line);
+  const roomRef = doc(db, "rooms", roomCode);
+  const updates = {};
+  for(const [pid] of Object.entries(roomData.players || {})){
+    updates[`players.${pid}.score`] = 0;
   }
-}
+  updates.updatedAt = now();
+  await updateDoc(roomRef, updates);
+  closeWinner();
+};
 
-async function createRoom(hostName, hostId, hostColor){
-  const code = generateRoomCode();
-  const roomRef = doc(db, "rooms", code);
+/* ===================== MULTI UI ===================== */
+btnJoin.onclick = ()=> multiBox.classList.toggle("hidden");
 
-  await setDoc(roomRef, {
-    hostId: hostId,
-    phase: "lobby",
-    category: null,
-    secret: null,
-    guesses: {},
-    players: {
-      [hostId]: { name: hostName, color: hostColor, score: 0 }
-    },
-    createdAt: Date.now()
-  });
-
-  return code;
-}
-
-async function joinRoom(code, playerId, playerName, playerColor){
-  const roomRef = doc(db, "rooms", code);
-  const snap = await getDoc(roomRef);
-
-  if (!snap.exists()) {
-    alert("Room inexistante");
-    return false;
-  }
-
-  await updateDoc(roomRef, {
-    [`players.${playerId}`]: { name: playerName, color: playerColor, score: 0 }
-  });
-
-  return true;
-}
-
-function listenRoom(code) {
-  const roomRef = doc(db, "rooms", code);
-
-  onSnapshot(roomRef, (snap) => {
-    if (!snap.exists()) return;
-    const data = snap.data();
-
-    roomHostIdCache = data.hostId || null;
-    renderLobby(data.players || {});
-
-    // Prochaine étape : ici on synchronise phase/secret/category/guesses pour jouer réellement en multi.
-  });
-}
-
-btnHost.onclick = async () => {
+btnHost.onclick = async ()=>{
   try{
     myId = getOrCreateMyId();
     isHost = true;
@@ -1367,38 +1324,35 @@ btnHost.onclick = async () => {
     const name = (prompt("Ton pseudo (host) ?", "Host") || "Host").slice(0,14);
     const color = COLOR_CHOICES[0].value;
 
-    const code = await createRoom(name, myId, color);
-    showRoomUI(code);
-    listenRoom(code);
+    const code = await createRoom(name, color);
+    roomCode = code;
+
     alert("Code à partager : " + code);
+    listenRoom(code);
   }catch(e){
     alert("Erreur host: " + (e?.message || e));
     console.error(e);
   }
 };
 
-btnJoin.onclick = () => {
-  multiBox.classList.toggle("hidden");
-};
-
-btnConfirmJoin.onclick = async () => {
+btnConfirmJoin.onclick = async ()=>{
   try{
     myId = getOrCreateMyId();
     isHost = false;
 
     const code = (roomCodeInput.value || "").trim().toUpperCase();
     const name = ((playerNameInput.value || "").trim() || "Joueur").slice(0,14);
-    const color = COLOR_CHOICES[1].value;
+    const color = COLOR_CHOICES[rand(0, COLOR_CHOICES.length-1)].value;
 
     if(code.length !== 4){
       alert("Le code doit faire 4 caractères.");
       return;
     }
 
-    const ok = await joinRoom(code, myId, name, color);
+    const ok = await joinRoom(code, name, color);
     if(!ok) return;
 
-    showRoomUI(code);
+    roomCode = code;
     listenRoom(code);
   }catch(e){
     alert("Erreur join: " + (e?.message || e));
@@ -1409,19 +1363,15 @@ btnConfirmJoin.onclick = async () => {
 /* ===================== INIT ===================== */
 loadSettings();
 
-if(!loadPlayers()){
-  players = [
-    {id:uid(), name:"Joueur 1", color: COLOR_CHOICES[0].value, score:0},
-    {id:uid(), name:"Joueur 2", color: COLOR_CHOICES[1].value, score:0},
-    {id:uid(), name:"Joueur 3", color: COLOR_CHOICES[2].value, score:0},
-  ];
-  psychicIndex = 0;
-  savePlayers();
-}
-
-phase = "setup";
-currentCategory = null;
-updateUI();
+// état initial
+setPair(null, null);
+sliderWrap.classList.add("hidden");
+legendWrap.classList.add("hidden");
+revealNote.classList.add("hidden");
+drawDial({mode:"psychic_word", secret:50, guesses:{}, playersMap:{}, psychicId:"", currentNeedle:50});
+btn.textContent = "Crée ou rejoins une room";
+btn.onclick = null;
+syncSlider();
 </script>
 </body>
 </html>
