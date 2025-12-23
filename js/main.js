@@ -239,152 +239,127 @@ function attachListener(code){
         + (isMyTurnPsychic(roomData, myId) ? "Tu es PSYCHIC." : "");
 
       // ===== Rendu jeu =====
-      const phase = roomData.phase || "lobby";
-      const category = roomData.category;
-      const word = roomData.word;
+const phase = roomData.phase || "lobby";
+const category = roomData.category;
+const word = roomData.word;
 
-      if (phase === "lobby") {
-        setPair(pairDiv, "Lobby", isRoomHost(roomData, myId) ? "Host: lance la manche" : "En attente du host…");
-        sliderWrap.classList.add("hidden");
-        legendWrap.classList.add("hidden");
-        revealNote.classList.add("hidden");
+if (phase === "lobby") {
+  setPair(pairDiv, "Lobby", isRoomHost(roomData, myId) ? "Host: lance la manche" : "En attente du host…");
+  sliderWrap.classList.add("hidden");
+  legendWrap.classList.add("hidden");
+  revealNote.classList.add("hidden");
 
-        drawDial(ctx, {
-          mode: "psychic_word",
-          secret: 50,
-          guesses: {},
-          playersMap: {},
-          psychicId: roomData.psychicId,
-          currentNeedle: 50
-        });
+  drawDial(ctx, {
+    mode: "psychic_word",
+    secret: 50,
+    guesses: {},
+    playersMap: {},
+    psychicId: roomData.psychicId,
+    currentNeedle: 50
+  });
 
-            } else if (phase === "psychic_word") {
-        setPair(
-          pairDiv,
-          category || "Catégorie",
-          isMyTurnPsychic(roomData, myId) ? "Écris le mot…" : "En attente du Psychic…"
-        );
+} else if (phase === "psychic_word") {
+  setPair(
+    pairDiv,
+    category || "Catégorie",
+    isMyTurnPsychic(roomData, myId) ? "Écris le mot…" : "En attente du Psychic…"
+  );
 
-        sliderWrap.classList.add("hidden");
-        legendWrap.classList.add("hidden");
-        revealNote.classList.add("hidden");
+  sliderWrap.classList.add("hidden");
+  legendWrap.classList.add("hidden");
+  revealNote.classList.add("hidden");
 
-        console.log("[psychic_word]", {
-          myId,
-          psychicId: roomData.psychicId,
-          isPsychic: isMyTurnPsychic(roomData, myId),
-          secret: roomData.secret
-        });
+  console.log("[psychic_word]", {
+    myId,
+    psychicId: roomData.psychicId,
+    isPsychic: isMyTurnPsychic(roomData, myId),
+    secret: roomData.secret
+  });
 
-        if (isMyTurnPsychic(roomData, myId)) {
-          // PSYCHIC : aiguille épaisse sur le secret dès maintenant
-          drawDial(ctx, {
-            mode: "psychic_secret",
-            secret: roomData.secret,
-            guesses: roomData.guesses || {},
-            playersMap: roomData.players || {},
-            psychicId: roomData.psychicId,
-            currentNeedle: 50
-          });
-        } else {
-          // JOUEURS : aiguille neutre
-          drawDial(ctx, {
-            mode: "psychic_word",
-            secret: 50,
-            guesses: {},
-            playersMap: {},
-            psychicId: roomData.psychicId,
-            currentNeedle: 50
-          });
-        }}
-         else if (phase === "team") {
-        setPair(pairDiv, category || "Catégorie", word || "Mot");
+  if (isMyTurnPsychic(roomData, myId)) {
+    drawDial(ctx, {
+      mode: "psychic_secret",
+      secret: roomData.secret,
+      guesses: roomData.guesses || {},
+      playersMap: roomData.players || {},
+      psychicId: roomData.psychicId,
+      currentNeedle: 50
+    });
+  } else {
+    drawDial(ctx, {
+      mode: "psychic_word",
+      secret: 50,
+      guesses: {},
+      playersMap: {},
+      psychicId: roomData.psychicId,
+      currentNeedle: 50
+    });
+  }
 
-        legendWrap.classList.add("hidden");
-        revealNote.classList.add("hidden");
+} else if (phase === "team") {
+  setPair(pairDiv, category || "Catégorie", word || "Mot");
 
-        if (isMyTurnPsychic(roomData, myId)) {
-          // PSYCHIC : aiguille blanche FIXE sur le secret
-          sliderWrap.classList.add("hidden");
-          console.log("[RENDER]", {
-          phase,
-          me: myId,
-          psychicId: roomData.psychicId,
-          isPsychic: isMyTurnPsychic(roomData, myId),
-          secret: roomData.secret
-          });
+  legendWrap.classList.add("hidden");
+  revealNote.classList.add("hidden");
 
-          drawDial(ctx, {
-            mode: "psychic_secret",
-            secret: roomData.secret,
-            guesses: roomData.guesses || {},
-            playersMap: roomData.players || {},
-            psychicId: roomData.psychicId,
-            currentNeedle: 50
-          });
-        } else {
-          // JOUEURS : ils placent leur aiguille
-          sliderWrap.classList.remove("hidden");
-          console.log("[RENDER]", {
-          phase,
-          me: myId,
-          psychicId: roomData.psychicId,
-          isPsychic: isMyTurnPsychic(roomData, myId),
-          secret: roomData.secret
-          });
+  if (isMyTurnPsychic(roomData, myId)) {
+    sliderWrap.classList.add("hidden");
 
-          drawDial(ctx, {
-            mode: "team",
-            secret: roomData.secret,
-            guesses: roomData.guesses || {},
-            playersMap: roomData.players || {},
-            psychicId: roomData.psychicId,
-            currentNeedle
-          });
-        }
+    drawDial(ctx, {
+      mode: "psychic_secret",
+      secret: roomData.secret,
+      guesses: roomData.guesses || {},
+      playersMap: roomData.players || {},
+      psychicId: roomData.psychicId,
+      currentNeedle: 50
+    });
+  } else {
+    sliderWrap.classList.remove("hidden");
 
-        // Host auto reveal + anti double-score dans multiplayer.js
-        if (isRoomHost(roomData, myId)) {
-          await hostComputeRevealAndScore({ roomCode, roomData });
-        }
+    drawDial(ctx, {
+      mode: "team",
+      secret: roomData.secret,
+      guesses: roomData.guesses || {},
+      playersMap: roomData.players || {},
+      psychicId: roomData.psychicId,
+      currentNeedle
+    });
+  }
 
-      } else if (phase === "reveal") {
-        setPair(pairDiv, category || "Catégorie", word || "Mot");
-        sliderWrap.classList.add("hidden");
-        legendWrap.classList.remove("hidden");
-        revealNote.classList.remove("hidden");
-        console.log("[RENDER]", {
-        phase,
-        me: myId,
-        psychicId: roomData.psychicId,
-        isPsychic: isMyTurnPsychic(roomData, myId),
-        secret: roomData.secret
-        });
+  if (isRoomHost(roomData, myId)) {
+    await hostComputeRevealAndScore({ roomCode, roomData });
+  }
 
-        drawDial(ctx, {
-          mode: "reveal",
-          secret: roomData.secret,
-          guesses: roomData.guesses || {},
-          playersMap: roomData.players || {},
-          psychicId: roomData.psychicId,
-          currentNeedle: 50
-        });
+} else if (phase === "reveal") {
+  setPair(pairDiv, category || "Catégorie", word || "Mot");
+  sliderWrap.classList.add("hidden");
+  legendWrap.classList.remove("hidden");
+  revealNote.classList.remove("hidden");
 
-        // Victoire
-        const target = Number(roomData.pointsToWin || 20);
-        if (Number.isFinite(target) && target > 0) {
-          let best = null;
-          for (const [pid, p] of Object.entries(roomData.players || {})) {
-            const s = p.score || 0;
-            if (s >= target && (!best || s > best.score)) {
-              best = { pid, name: p.name || pid, score: s };
-            }
-          }
-          if (best) {
-            openWinner(winnerOverlay, winnerTitle, winnerSub, best.name, best.score, target);
-          }
-        }
+  drawDial(ctx, {
+    mode: "reveal",
+    secret: roomData.secret,
+    guesses: roomData.guesses || {},
+    playersMap: roomData.players || {},
+    psychicId: roomData.psychicId,
+    currentNeedle: 50
+  });
+
+  const target = Number(roomData.pointsToWin || 20);
+  if (Number.isFinite(target) && target > 0) {
+    let best = null;
+    for (const [pid, p] of Object.entries(roomData.players || {})) {
+      const s = p.score || 0;
+      if (s >= target && (!best || s > best.score)) {
+        best = { pid, name: p.name || pid, score: s };
       }
+    }
+    if (best) {
+      openWinner(winnerOverlay, winnerTitle, winnerSub, best.name, best.score, target);
+    }
+  }
+}
+
 
       updateActionButton();
     }
