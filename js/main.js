@@ -270,6 +270,14 @@ function attachListener(code){
         revealNote.classList.add("hidden");
 
         if (isMyTurnPsychic(roomData, myId)) {
+          console.log("[RENDER]", {
+          phase,
+          me: myId,
+          psychicId: roomData.psychicId,
+          isPsychic: isMyTurnPsychic(roomData, myId),
+          secret: roomData.secret
+          });
+
           // PSYCHIC : voit l'aiguille blanche sur le secret (random) et elle reste fixe
           drawDial(ctx, {
             mode: "psychic_secret",
@@ -281,6 +289,13 @@ function attachListener(code){
           });
         } else {
           // JOUEURS : aiguille neutre
+          console.log("[RENDER]", {
+          phase,
+          me: myId,
+          psychicId: roomData.psychicId,
+          isPsychic: isMyTurnPsychic(roomData, myId),
+          secret: roomData.secret
+          });
           drawDial(ctx, {
             mode: "psychic_word",
             secret: 50,
@@ -300,6 +315,13 @@ function attachListener(code){
         if (isMyTurnPsychic(roomData, myId)) {
           // PSYCHIC : aiguille blanche FIXE sur le secret
           sliderWrap.classList.add("hidden");
+          console.log("[RENDER]", {
+          phase,
+          me: myId,
+          psychicId: roomData.psychicId,
+          isPsychic: isMyTurnPsychic(roomData, myId),
+          secret: roomData.secret
+          });
 
           drawDial(ctx, {
             mode: "psychic_secret",
@@ -312,6 +334,13 @@ function attachListener(code){
         } else {
           // JOUEURS : ils placent leur aiguille
           sliderWrap.classList.remove("hidden");
+          console.log("[RENDER]", {
+          phase,
+          me: myId,
+          psychicId: roomData.psychicId,
+          isPsychic: isMyTurnPsychic(roomData, myId),
+          secret: roomData.secret
+          });
 
           drawDial(ctx, {
             mode: "team",
@@ -333,6 +362,13 @@ function attachListener(code){
         sliderWrap.classList.add("hidden");
         legendWrap.classList.remove("hidden");
         revealNote.classList.remove("hidden");
+        console.log("[RENDER]", {
+        phase,
+        me: myId,
+        psychicId: roomData.psychicId,
+        isPsychic: isMyTurnPsychic(roomData, myId),
+        secret: roomData.secret
+        });
 
         drawDial(ctx, {
           mode: "reveal",
