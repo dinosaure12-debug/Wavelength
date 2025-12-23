@@ -258,55 +258,50 @@ function attachListener(code){
           currentNeedle: 50
         });
 
-      } else if (phase === "psychic_word") {
-        setPair(
-          pairDiv,
-          category || "Catégorie",
-          isMyTurnPsychic(roomData, myId) ? "Écris le mot…" : "En attente du Psychic…"
-        );
+      }  else if (phase === "psychic_word") {
+  setPair(
+    pairDiv,
+    category || "Catégorie",
+    isMyTurnPsychic(roomData, myId) ? "Écris le mot…" : "En attente du Psychic…"
+  );
 
-        sliderWrap.classList.add("hidden");
-        legendWrap.classList.add("hidden");
-        revealNote.classList.add("hidden");
+  sliderWrap.classList.add("hidden");
+  legendWrap.classList.add("hidden");
+  revealNote.classList.add("hidden");
 
-        if (isMyTurnPsychic(roomData, myId)) {
-          console.log("[RENDER]", {
-          phase,
-          me: myId,
-          psychicId: roomData.psychicId,
-          isPsychic: isMyTurnPsychic(roomData, myId),
-          secret: roomData.secret
-          });
+  // Debug utile (tu peux enlever après)
+  console.log("[psychic_word]", {
+    myId,
+    psychicId: roomData.psychicId,
+    isPsychic: isMyTurnPsychic(roomData, myId),
+    secret: roomData.secret
+  });
 
-          // PSYCHIC : voit l'aiguille blanche sur le secret (random) et elle reste fixe
-          drawDial(ctx, {
-            mode: "psychic_secret",
-            secret: roomData.secret,
-            guesses: roomData.guesses || {},
-            playersMap: roomData.players || {},
-            psychicId: roomData.psychicId,
-            currentNeedle: 50
-          });
-        } else {
-          // JOUEURS : aiguille neutre
-          console.log("[RENDER]", {
-          phase,
-          me: myId,
-          psychicId: roomData.psychicId,
-          isPsychic: isMyTurnPsychic(roomData, myId),
-          secret: roomData.secret
-          });
-          drawDial(ctx, {
-            mode: "psychic_word",
-            secret: 50,
-            guesses: {},
-            playersMap: {},
-            psychicId: roomData.psychicId,
-            currentNeedle: 50
-          });
-        }
+  if (isMyTurnPsychic(roomData, myId)) {
+    // PSYCHIC : aiguille épaisse sur le secret dès maintenant
+    drawDial(ctx, {
+      mode: "psychic_secret",
+      secret: roomData.secret,
+      guesses: roomData.guesses || {},
+      playersMap: roomData.players || {},
+      psychicId: roomData.psychicId,
+      currentNeedle: 50
+    });
+  } else {
+    // JOUEURS : aiguille neutre
+    drawDial(ctx, {
+      mode: "psychic_word",
+      secret: 50,
+      guesses: {},
+      playersMap: {},
+      psychicId: roomData.psychicId,
+      currentNeedle: 50
+    });
+  
 
-      } else if (phase === "team") {
+
+
+      }} else if (phase === "team") {
         setPair(pairDiv, category || "Catégorie", word || "Mot");
 
         legendWrap.classList.add("hidden");
