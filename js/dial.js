@@ -80,19 +80,19 @@ export function drawNeedle(ctx, pct, color, width, cx, cy, r){
   ctx.restore();
 }
 
-export function drawDial(ctx, { mode, secret, guesses, playersMap, psychicId, currentNeedle }){
+export function drawDial(ctx, { mode, secret, guesses, playersMap, psychicId, currentNeedle }) {
   ctx.clearRect(0, 0, 900, 520);
+
   const cx = 450, cy = 460, r = 320;
 
-  // Base
+  // Arc de base TOUJOURS dessiné
   drawBaseArc(ctx, cx, cy, r);
 
-  // Scoring bands uniquement en reveal
-  if(mode === "reveal"){
+  if (mode === "reveal") {
     drawScoringBands(ctx, cx, cy, r, secret);
   }
 
-  // Centre
+  // centre
   ctx.save();
   ctx.fillStyle = "rgba(255,255,255,.90)";
   ctx.beginPath();
@@ -100,31 +100,21 @@ export function drawDial(ctx, { mode, secret, guesses, playersMap, psychicId, cu
   ctx.fill();
   ctx.restore();
 
-  // ===== MODES =====
+  // ===== AIGUILLES =====
 
-  // 1) Psychic en attente / neutre : aiguille fine à 50
-  if(mode === "psychic_word"){
-    drawNeedle(ctx, 50, "rgba(255,255,255,.65)", 4, cx, cy, r);
-    return;
-  }
+  if (mode === "psychic_secret") {
+    // Aiguille SECRETTE du Psychic (épaisse + bordure)
+    drawNeedle(ctx, secret, "rgba(255,255,255,.95)", 11, cx, cy, r);
 
-  // 2) Psychic secret : aiguille blanche épaisse + bordure sur secret
-  if(mode === "psychic_secret"){
-    drawNeedle(ctx, secret, "rgba(255,255,255,.95)", 10, cx, cy, r);
-
-    // petit label optionnel
     ctx.save();
-    ctx.fillStyle = "rgba(255,255,255,.70)";
+    ctx.fillStyle = "rgba(255,255,255,.75)";
     ctx.font = "900 14px Arial";
     ctx.textAlign = "center";
     ctx.fillText("Position secrète", cx, 92);
     ctx.restore();
-
-    return;
   }
 
-  // 3) Team : aiguille du joueur (currentNeedle)
-  if(mode === "team"){
+  if (mode === "team") {
     drawNeedle(ctx, currentNeedle, "rgba(255,255,255,.92)", 6, cx, cy, r);
 
     ctx.save();
@@ -136,36 +126,17 @@ export function drawDial(ctx, { mode, secret, guesses, playersMap, psychicId, cu
     ctx.fillStyle = "rgba(255,255,255,.60)";
     ctx.fillText("Ton placement", cx, 95);
     ctx.restore();
-
-    return;
   }
 
-  // 4) Reveal : secret + aiguilles des joueurs
-  if(mode === "reveal"){
-    // Aiguille du secret (blanche très épaisse)
+  if (mode === "reveal") {
     drawNeedle(ctx, secret, "rgba(255,255,255,.95)", 11, cx, cy, r);
 
-    // Aiguilles des joueurs (hors psychic)
-    for(const [pid, g] of Object.entries(guesses || {})){
-      if(pid === psychicId) continue;
+    for (const [pid, g] of Object.entries(guesses || {})) {
+      if (pid === psychicId) continue;
       const p = playersMap?.[pid];
-      if(p && typeof g === "number"){
+      if (p && typeof g === "number") {
         drawNeedle(ctx, g, p.color || "#999", 5, cx, cy, r);
       }
     }
-
-    // Marqueur orange sur l'arc
-    const as = pctToAngle(secret);
-    ctx.save();
-    ctx.fillStyle = "#f97316";
-    ctx.beginPath();
-    ctx.arc(cx + Math.cos(as) * r, cy - Math.sin(as) * r, 7, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-
-    return;
   }
-
-  // Si mode inconnu : fallback neutre
-  drawNeedle(ctx, 50, "rgba(255,255,255,.65)", 4, cx, cy, r);
 }

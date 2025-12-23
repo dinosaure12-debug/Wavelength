@@ -251,7 +251,7 @@ if (phase === "lobby") {
   revealNote.classList.add("hidden");
 
   drawDial(ctx, {
-    mode: "psychic_word",
+    mode: "lobby",
     secret: 50,
     guesses: {},
     playersMap: {},
