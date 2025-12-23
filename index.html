@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Wavelength – Mobile</title>
+<title>Wavelength – Mobile (Solo + Multi Lobby)</title>
 
 <style>
 :root{
@@ -329,38 +329,42 @@ select:focus, input[type="text"]:focus{
     <button id="btnSettings" class="ghost">Paramètres</button>
     <button id="actionBtn" class="primary">Nouvelle partie</button>
   </div>
+
+  <!-- ===== MULTI PANEL (Lobby) ===== -->
   <div class="panel">
-  <div style="font-weight:950; font-size:16px; margin-bottom:10px;">Multijoueur</div>
+    <div style="font-weight:950; font-size:16px; margin-bottom:10px;">Multijoueur (Lobby)</div>
 
-  <div class="row" style="gap:10px;">
-    <button id="btnHost" class="primary" style="flex:1;">Créer une room</button>
-    <button id="btnJoin" class="ghost" style="flex:1;">Rejoindre</button>
-  </div>
-
-  <div id="multiBox" style="margin-top:12px;" class="hidden">
-    <div class="row">
-      <div class="field">
-        <label>Code room</label>
-        <input id="roomCodeInput" type="text" placeholder="ABCD" maxlength="4" />
-      </div>
-      <div class="field">
-        <label>Pseudo</label>
-        <input id="playerNameInput" type="text" placeholder="Ton pseudo" maxlength="14" />
-      </div>
+    <div class="row" style="gap:10px;">
+      <button id="btnHost" class="primary" style="flex:1;">Créer une room</button>
+      <button id="btnJoin" class="ghost" style="flex:1;">Rejoindre</button>
     </div>
 
-    <div class="row" style="justify-content:flex-end;">
-      <button id="btnConfirmJoin" class="primary">OK</button>
+    <div id="multiBox" style="margin-top:12px;" class="hidden">
+      <div class="row">
+        <div class="field">
+          <label>Code room</label>
+          <input id="roomCodeInput" type="text" placeholder="ABCD" maxlength="4" />
+        </div>
+        <div class="field">
+          <label>Pseudo</label>
+          <input id="playerNameInput" type="text" placeholder="Ton pseudo" maxlength="14" />
+        </div>
+      </div>
+      <div class="row" style="justify-content:flex-end;">
+        <button id="btnConfirmJoin" class="primary">OK</button>
+      </div>
+      <div class="small" style="margin-top:6px;">Astuce : mets le code en MAJUSCULES.</div>
+    </div>
+
+    <div id="roomInfo" class="hidden" style="margin-top:12px;">
+      <div class="badge">Room : <b id="roomCodeLabel">----</b></div>
+      <div class="small" style="margin-top:8px;">Joueurs connectés :</div>
+      <div id="lobbyPlayers" style="margin-top:8px; display:flex; flex-direction:column; gap:8px;"></div>
+      <div class="small" style="margin-top:8px;">
+        Pour l’instant : lobby uniquement. Ensuite on synchronise la manche (mot, phase, placements, reveal).
+      </div>
     </div>
   </div>
-
-  <div id="roomInfo" class="hidden" style="margin-top:12px;">
-    <div class="badge">Room : <b id="roomCodeLabel">----</b></div>
-    <div class="small" style="margin-top:8px;">Joueurs connectés :</div>
-    <div id="lobbyPlayers" style="margin-top:8px; display:flex; flex-direction:column; gap:8px;"></div>
-  </div>
-</div>
-
 
   <div class="panel" id="scoresPanel">
     <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
@@ -378,7 +382,7 @@ select:focus, input[type="text"]:focus{
     <div class="row" style="justify-content:space-between;">
       <div>
         <h2>Participants</h2>
-        <div class="small">Choisis les pseudos et une couleur. Le Psychic est tiré au sort au démarrage.</div>
+        <div class="small">Choisis les pseudos et une couleur (barres en reveal).</div>
       </div>
       <button id="btnCloseSetup" class="ghost">Fermer</button>
     </div>
@@ -392,7 +396,7 @@ select:focus, input[type="text"]:focus{
       </div>
       <div class="field">
         <label>Info</label>
-        <div class="small">Les couleurs servent aux barres en reveal.</div>
+        <div class="small">Tu peux modifier les noms et les couleurs.</div>
       </div>
     </div>
 
@@ -451,8 +455,8 @@ select:focus, input[type="text"]:focus{
   </div>
 </div>
 
-<script>
-// ================= DEBUG MOBILE =================
+<script type="module">
+/* ================= DEBUG MOBILE ================= */
 window.addEventListener("error", function (e) {
   const box = document.getElementById("errBox");
   if (!box) return;
@@ -470,128 +474,78 @@ window.addEventListener("unhandledrejection", function (e) {
   box.classList.remove("hidden");
   box.innerHTML = `
     <b>Promise rejetée</b><br>
-    ${e.reason}
+    ${String(e.reason)}
   `;
 });
+
+/* ================= FIREBASE (CDN) =================
+   Important: avec GitHub Pages, on utilise les modules CDN, pas "npm install".
+*/
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {
+  getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+// === Mets TON config Firebase ici (celle que tu m'as envoyée) ===
+const firebaseConfig = {
+  apiKey: "AIzaSyB2bxTrr3nT_p20hEp7j2DFR3ptWtDPXP4",
+  authDomain: "wavelength-3728d.firebaseapp.com",
+  projectId: "wavelength-3728d",
+  storageBucket: "wavelength-3728d.firebasestorage.app",
+  messagingSenderId: "1045281881502",
+  appId: "1:1045281881502:web:fafcfa708554d5564e6a8f"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 /* ===================== CATEGORY PACKS ===================== */
 const CATEGORY_PACKS = {
   table: {
     label: "Autour de la table",
     items: [
-      "quelqu’un de radin",
-      "quelqu’un de drôle",
-      "quelqu’un de susceptible",
-      "quelqu’un d’organisé",
-      "quelqu’un de retardataire",
-      "quelqu’un de chill",
-      "quelqu’un de compétitif",
-      "quelqu’un de têtu",
-      "quelqu’un de diplomate",
-      "quelqu’un de bordélique",
-      "quelqu’un de chanceux",
-      "quelqu’un de malchanceux"
+      "quelqu’un de radin","quelqu’un de drôle","quelqu’un de susceptible","quelqu’un d’organisé",
+      "quelqu’un de retardataire","quelqu’un de chill","quelqu’un de compétitif","quelqu’un de têtu",
+      "quelqu’un de diplomate","quelqu’un de bordélique","quelqu’un de chanceux","quelqu’un de malchanceux"
     ]
   },
   objets: {
     label: "Objets",
     items: [
-      "un objet de cuisine",
-      "un gadget",
-      "un truc qui fait du bruit",
-      "un objet de daron",
-      "une chaussure",
-      "une voiture",
-      "une console",
-      "un moyen de locomotion",
-      "un objet dangereux"
+      "un objet de cuisine","un gadget","un truc qui fait du bruit","un objet de daron",
+      "une chaussure","une voiture","une console","un moyen de locomotion","un objet dangereux"
     ]
   },
   bouffe: {
     label: "Bouffe",
-    items: [
-      "un truc pour une raclette",
-      "un fromage",
-      "un burger",
-      "un plat",
-      "un dessert",
-      "une boisson",
-      "une viennoiserie",
-      "un truc de fête"
-    ]
+    items: ["un truc pour une raclette","un fromage","un burger","un plat","un dessert","une boisson","une viennoiserie","un truc de fête"]
   },
   pop: {
     label: "Pop culture",
     items: [
-      "un rappeur",
-      "un acteur",
-      "un mème",
-      "un jeu vidéo",
-      "un streamer",
-      "une série",
-      "un anime",
-      "un super-héros",
-      "un clip",
-      "un banger",
-      "un blockbuster",
-      "un sportif",
-      "un auteur",
-      "un politique",
-      "un influenceur"
+      "un rappeur","un acteur","un mème","un jeu vidéo","un streamer","une série","un anime","un super-héros",
+      "un clip","un banger","un blockbuster","un sportif","un auteur","un politique","un influenceur"
     ]
   },
   lieux: {
     label: "Lieux",
-    items: [
-      "un aéroport",
-      "une plage",
-      "un camping",
-      "un centre commercial",
-      "un métro",
-      "un stade",
-      "une boîte de nuit",
-      "un pays"
-    ]
+    items: ["un aéroport","une plage","un camping","un centre commercial","un métro","un stade","une boîte de nuit","un pays"]
   },
   marques: {
     label: "Marques",
-    items: [
-      "une marque de streetwear",
-      "une marque de téléphone",
-      "une marque de voiture",
-      "un studio de jeu vidéo",
-      "une marque tech",
-      "une marque de boisson"
-    ]
+    items: ["une marque de streetwear","une marque de téléphone","une marque de voiture","un studio de jeu vidéo","une marque tech","une marque de boisson"]
   },
   metiers: {
     label: "Jobs et vie adulte",
-    items: [
-      "un métier",
-      "un type de collègue",
-      "un type de client",
-      "un type de patron",
-      "une paye"
-    ]
+    items: ["un métier","un type de collègue","un type de client","un type de patron","une paye"]
   },
   internet: {
     label: "Réseaux sociaux et internet",
-    items: [
-      "une appli",
-      "un réseau social",
-      "une trend",
-      "une notification",
-      "une vidéo YouTube"
-    ]
+    items: ["une appli","un réseau social","une trend","une notification","une vidéo YouTube"]
   },
   delires: {
     label: "Délires et situations absurdes",
-    items: [
-      "un super-pouvoir",
-      "une catastrophe",
-      "une peur",
-      "un truc illégal"
-    ]
+    items: ["un super-pouvoir","une catastrophe","une peur","un truc illégal"]
   }
 };
 
@@ -688,6 +642,17 @@ const btnCloseWinner = document.getElementById("btnCloseWinner");
 const btnResetAll = document.getElementById("btnResetAll");
 const btnContinue = document.getElementById("btnContinue");
 
+/* MULTI DOM */
+const btnHost = document.getElementById("btnHost");
+const btnJoin = document.getElementById("btnJoin");
+const multiBox = document.getElementById("multiBox");
+const roomCodeInput = document.getElementById("roomCodeInput");
+const playerNameInput = document.getElementById("playerNameInput");
+const btnConfirmJoin = document.getElementById("btnConfirmJoin");
+const roomInfo = document.getElementById("roomInfo");
+const roomCodeLabel = document.getElementById("roomCodeLabel");
+const lobbyPlayers = document.getElementById("lobbyPlayers");
+
 /* ===================== UTILS ===================== */
 const rand = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
@@ -741,9 +706,8 @@ function loadSettings(){
 function enabledItems(){
   const keys = Object.keys(CATEGORY_PACKS).filter(k => settings.packsEnabled[k]);
   const list = [];
-  for(const k of keys){
-    list.push(...CATEGORY_PACKS[k].items);
-  }
+  for(const k of keys) list.push(...CATEGORY_PACKS[k].items);
+
   if(list.length === 0){
     for(const k of Object.keys(CATEGORY_PACKS)) list.push(...CATEGORY_PACKS[k].items);
   }
@@ -757,7 +721,6 @@ function pickCategory(){
 function pickCategoryOnce(){
   currentCategory = pickCategory();
 }
-
 function renderPair(){
   if(!currentCategory){
     pairDiv.innerHTML = `<span class="pill">—</span>`;
@@ -766,25 +729,10 @@ function renderPair(){
   pairDiv.innerHTML = `<span class="pill">${currentCategory}</span>`;
 }
 
-/* ===================== DRAW ===================== */
-/**
- * IMPORTANT:
- * - Les AIGUILLES: on veut visuellement le demi-cercle du HAUT => y = cy - sin(a)*r
- *   Donc on utilise un angle "0..PI" et on inverse le Y (déjà fait).
- * - Les ARCS (ctx.arc): on veut dessiner sur le haut aussi, mais ctx.arc utilise le repère canvas (Y vers le bas).
- *   Donc on dessine les arcs sur PI..2PI.
- */
-
-// AIGUILLES (0..PI)
-function pctToNeedleAngle(pct){
-  // 0% = gauche (PI), 100% = droite (0)
+/* ===================== DRAW (CORRIGÉ) ===================== */
+function pctToAngle(pct){
+  // 0% = gauche (PI), 100% = droite (0) -> demi-cercle HAUT
   return Math.PI - (pct/100) * Math.PI;
-}
-
-// ARCS (PI..2PI)
-function pctToArcAngle(pct){
-  // 0% = gauche (PI), 100% = droite (2PI)
-  return Math.PI + (pct/100) * Math.PI;
 }
 
 function drawBaseArc(cx,cy,r){
@@ -793,22 +741,32 @@ function drawBaseArc(cx,cy,r){
   ctx.lineWidth=60;
   ctx.lineCap="round";
   ctx.beginPath();
-  ctx.arc(cx, cy, r, Math.PI, Math.PI*2, false); // demi-cercle haut
+  ctx.arc(cx,cy,r,Math.PI,0,false); // demi-cercle haut
   ctx.stroke();
   ctx.restore();
 }
+
+/**
+ * Bande autour de centerPct, sans wrap, et on CLIP sur la moitié haute.
+ */
 function drawArcBand(cx,cy,r, centerPct, radiusPct, color, lw){
   const leftPct  = clamp(centerPct - radiusPct, 0, 100);
   const rightPct = clamp(centerPct + radiusPct, 0, 100);
 
-  const aLeft  = pctToArcAngle(leftPct);
-  const aRight = pctToArcAngle(rightPct);
+  const aLeft  = pctToAngle(leftPct);   // proche de PI
+  const aRight = pctToAngle(rightPct);  // proche de 0
 
   ctx.save();
+  // clip moitié haute (empêche d'apparaître en bas)
+  ctx.beginPath();
+  ctx.rect(0, 0, 900, cy); // tout ce qui est au-dessus du centre
+  ctx.clip();
+
   ctx.strokeStyle = color;
   ctx.lineWidth = lw;
   ctx.lineCap = "butt";
   ctx.beginPath();
+  // start = gauche (plus grand) -> end = droite (plus petit) : pas de wrap
   ctx.arc(cx, cy, r, aLeft, aRight, false);
   ctx.stroke();
   ctx.restore();
@@ -817,19 +775,22 @@ function drawArcBand(cx,cy,r, centerPct, radiusPct, color, lw){
 function drawScoringBands(cx, cy, r){
   const ringR = r - 18;
   const lw = 40;
+
+  // rouge -> orange -> vert (du plus large au plus précis)
   drawArcBand(cx, cy, ringR, secret, Z_RED,    "rgba(239,68,68,.28)",  lw);
   drawArcBand(cx, cy, ringR, secret, Z_ORANGE, "rgba(245,158,11,.32)", lw);
   drawArcBand(cx, cy, ringR, secret, Z_GREEN,  "rgba(34,197,94,.36)",  lw);
 }
 
 function drawNeedle(pct, color, width, cx,cy,r){
-  const a = pctToNeedleAngle(pct);
+  const a = pctToAngle(pct);
   const nx = cx + Math.cos(a)*r;
   const ny = cy - Math.sin(a)*r;
 
   ctx.save();
   ctx.lineCap="round";
 
+  // contour sombre
   ctx.strokeStyle = "rgba(0,0,0,.55)";
   ctx.lineWidth = width + 3;
   ctx.beginPath();
@@ -837,6 +798,7 @@ function drawNeedle(pct, color, width, cx,cy,r){
   ctx.lineTo(nx,ny);
   ctx.stroke();
 
+  // couleur
   ctx.strokeStyle = color;
   ctx.lineWidth = width;
   ctx.beginPath();
@@ -857,7 +819,7 @@ function drawDial({mode}){
     drawScoringBands(cx,cy,r);
   }
 
-  // Center hub
+  // hub
   ctx.save();
   ctx.fillStyle="rgba(255,255,255,.90)";
   ctx.beginPath();
@@ -868,7 +830,7 @@ function drawDial({mode}){
   if(mode === "psychic"){
     drawNeedle(secret, "rgba(255,255,255,.90)", 6, cx,cy,r);
 
-    const as = pctToNeedleAngle(secret);
+    const as = pctToAngle(secret);
     ctx.save();
     ctx.fillStyle = "#f97316";
     ctx.beginPath();
@@ -901,7 +863,7 @@ function drawDial({mode}){
       drawNeedle(g, p.color, 5, cx,cy,r);
     }
 
-    const as = pctToNeedleAngle(secret);
+    const as = pctToAngle(secret);
     ctx.save();
     ctx.fillStyle = "#f97316";
     ctx.beginPath();
@@ -911,7 +873,7 @@ function drawDial({mode}){
   }
 }
 
-/* ===================== GAME FLOW ===================== */
+/* ===================== GAME FLOW (SOLO) ===================== */
 function nextRound(){
   guesses = {};
   secret = rand(0,100);
@@ -963,7 +925,6 @@ function openWinner(winner){
 function closeWinner(){
   winnerOverlay.classList.remove("show");
 }
-
 function checkVictory(){
   const target = Number(settings.pointsToWin || 20);
   if(!Number.isFinite(target) || target <= 0) return null;
@@ -1054,9 +1015,7 @@ function updateUI(){
       savePlayers();
 
       const winner = checkVictory();
-      if(winner){
-        openWinner(winner);
-      }
+      if(winner) openWinner(winner);
     }
 
     turnTitle.textContent = "RÉVÉLATION";
@@ -1295,59 +1254,12 @@ btnResetScores.onclick = ()=>{
   renderScores();
 };
 
-/* ===================== INIT ===================== */
-loadSettings();
-
-if(!loadPlayers()){
-  players = [
-    {id:uid(), name:"Joueur 1", color: COLOR_CHOICES[0].value, score:0},
-    {id:uid(), name:"Joueur 2", color: COLOR_CHOICES[1].value, score:0},
-    {id:uid(), name:"Joueur 3", color: COLOR_CHOICES[2].value, score:0},
-  ];
-  psychicIndex = 0;
-  savePlayers();
-}
-
-phase = "setup";
-currentCategory = null;
-updateUI();
-</script>
-<!-- Firebase SDK (Web, sans npm) -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { 
-  getFirestore, 
-  doc, setDoc, getDoc, updateDoc, onSnapshot 
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyB2bxTrr3nT_p20hEp7j2DFR3ptWtDPXP4",
-  authDomain: "wavelength-3728d.firebaseapp.com",
-  projectId: "wavelength-3728d",
-  storageBucket: "wavelength-3728d.firebasestorage.app",
-  messagingSenderId: "1045281881502",
-  appId: "1:1045281881502:web:fafcfa708554d5564e6a8f"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-  // ================= MULTI STATE =================
+/* ===================== MULTI (Lobby) ===================== */
 let roomCode = null;
 let myId = null;
 let isHost = false;
+let roomHostIdCache = null;
 
-// DOM multi
-const btnHost = document.getElementById("btnHost");
-const btnJoin = document.getElementById("btnJoin");
-const multiBox = document.getElementById("multiBox");
-const roomCodeInput = document.getElementById("roomCodeInput");
-const playerNameInput = document.getElementById("playerNameInput");
-const btnConfirmJoin = document.getElementById("btnConfirmJoin");
-const roomInfo = document.getElementById("roomInfo");
-const roomCodeLabel = document.getElementById("roomCodeLabel");
-const lobbyPlayers = document.getElementById("lobbyPlayers");
-
-// util id joueur (persistant)
 function getOrCreateMyId(){
   const k = "wl_myId_v1";
   let v = localStorage.getItem(k);
@@ -1356,6 +1268,20 @@ function getOrCreateMyId(){
     localStorage.setItem(k, v);
   }
   return v;
+}
+
+function generateRoomCode(){
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let out = "";
+  for(let i=0;i<4;i++) out += chars[Math.floor(Math.random()*chars.length)];
+  return out;
+}
+
+function showRoomUI(code){
+  roomCode = code;
+  roomCodeLabel.textContent = code;
+  roomInfo.classList.remove("hidden");
+  multiBox.classList.add("hidden");
 }
 
 function renderLobby(playersMap){
@@ -1372,28 +1298,16 @@ function renderLobby(playersMap){
     line.innerHTML = `
       <div class="scoreLeft">
         <span class="colorDot" style="background:${p.color || "#999"}"></span>
-        <span class="nameText">${p.name || pid}${pid === roomHostIdCache ? " (Host)" : ""}${pid === myId ? " (Toi)" : ""}</span>
+        <span class="nameText">
+          ${p.name || pid}
+          ${pid === roomHostIdCache ? " (Host)" : ""}
+          ${pid === myId ? " (Toi)" : ""}
+        </span>
       </div>
       <div class="scorePts">${p.score ?? 0} pts</div>
     `;
     lobbyPlayers.appendChild(line);
   }
-}
-
-// cache hostId pour affichage
-let roomHostIdCache = null;
-createRoom("Host").then(code => alert("Code de la room : " + code));
-function showRoomUI(code){
-  roomCode = code;
-  roomCodeLabel.textContent = code;
-  roomInfo.classList.remove("hidden");
-  multiBox.classList.add("hidden");
-}
-  
-  
-
-  function generateRoomCode() {
-  return Math.random().toString(36).substring(2, 6).toUpperCase();
 }
 
 async function createRoom(hostName, hostId, hostColor){
@@ -1414,7 +1328,8 @@ async function createRoom(hostName, hostId, hostColor){
 
   return code;
 }
-  async function joinRoom(code, playerId, playerName, playerColor){
+
+async function joinRoom(code, playerId, playerName, playerColor){
   const roomRef = doc(db, "rooms", code);
   const snap = await getDoc(roomRef);
 
@@ -1435,31 +1350,31 @@ function listenRoom(code) {
 
   onSnapshot(roomRef, (snap) => {
     if (!snap.exists()) return;
-
     const data = snap.data();
-    roomHostIdCache = data.hostId || null;
 
-    // Affichage lobby
+    roomHostIdCache = data.hostId || null;
     renderLobby(data.players || {});
 
-    // Ici plus tard : synchroniser phase/secret/category/guesses...
-    // phase = data.phase; secret = data.secret; currentCategory = data.category; guesses = data.guesses...
-    // updateUI();
+    // Prochaine étape : ici on synchronise phase/secret/category/guesses pour jouer réellement en multi.
   });
 }
+
 btnHost.onclick = async () => {
-  myId = getOrCreateMyId();
-  isHost = true;
+  try{
+    myId = getOrCreateMyId();
+    isHost = true;
 
-  const name = prompt("Ton pseudo (host) ?", "Host") || "Host";
-  const color = COLOR_CHOICES[0].value; // tu pourras choisir plus tard
+    const name = (prompt("Ton pseudo (host) ?", "Host") || "Host").slice(0,14);
+    const color = COLOR_CHOICES[0].value;
 
-  const code = await createRoom(name.slice(0,14), myId, color);
-
-  showRoomUI(code);
-  listenRoom(code);
-
-  alert("Code à partager : " + code);
+    const code = await createRoom(name, myId, color);
+    showRoomUI(code);
+    listenRoom(code);
+    alert("Code à partager : " + code);
+  }catch(e){
+    alert("Erreur host: " + (e?.message || e));
+    console.error(e);
+  }
 };
 
 btnJoin.onclick = () => {
@@ -1467,31 +1382,46 @@ btnJoin.onclick = () => {
 };
 
 btnConfirmJoin.onclick = async () => {
-  myId = getOrCreateMyId();
-  isHost = false;
+  try{
+    myId = getOrCreateMyId();
+    isHost = false;
 
-  const code = (roomCodeInput.value || "").trim().toUpperCase();
-  const name = (playerNameInput.value || "").trim() || "Joueur";
-  const color = COLOR_CHOICES[1].value;
+    const code = (roomCodeInput.value || "").trim().toUpperCase();
+    const name = ((playerNameInput.value || "").trim() || "Joueur").slice(0,14);
+    const color = COLOR_CHOICES[1].value;
 
-  if(code.length !== 4){
-    alert("Le code doit faire 4 caractères.");
-    return;
+    if(code.length !== 4){
+      alert("Le code doit faire 4 caractères.");
+      return;
+    }
+
+    const ok = await joinRoom(code, myId, name, color);
+    if(!ok) return;
+
+    showRoomUI(code);
+    listenRoom(code);
+  }catch(e){
+    alert("Erreur join: " + (e?.message || e));
+    console.error(e);
   }
-
-  const ok = await joinRoom(code, myId, name.slice(0,14), color);
-  if(!ok) return;
-
-  showRoomUI(code);
-  listenRoom(code);
 };
 
+/* ===================== INIT ===================== */
+loadSettings();
 
+if(!loadPlayers()){
+  players = [
+    {id:uid(), name:"Joueur 1", color: COLOR_CHOICES[0].value, score:0},
+    {id:uid(), name:"Joueur 2", color: COLOR_CHOICES[1].value, score:0},
+    {id:uid(), name:"Joueur 3", color: COLOR_CHOICES[2].value, score:0},
+  ];
+  psychicIndex = 0;
+  savePlayers();
+}
 
-  // Rendre Firestore accessible partout dans ton jeu
-  window.db = db;
-
-  console.log("🔥 Firebase connecté");
+phase = "setup";
+currentCategory = null;
+updateUI();
 </script>
 </body>
 </html>
