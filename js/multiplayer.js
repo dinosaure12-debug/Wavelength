@@ -67,7 +67,7 @@ export async function hostStartRound({ roomCode, roomData }){
     phase: "psychic_word",
     category: cat,
     word: null,
-    secret,
+    secret : secret,
     guesses: {},
     roundId,
     scoredRoundId: null,
