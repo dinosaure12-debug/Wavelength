@@ -78,6 +78,14 @@ export function drawNeedle(ctx, pct, color, width, cx,cy,r){
 export function drawDial(ctx, {mode, secret, guesses, playersMap, psychicId, currentNeedle}){
   ctx.clearRect(0,0,900,520);
   const cx=450, cy=460, r=320;
+  // Fallback de sécurité : si on est en psychic_secret, on force l'aiguille sur secret
+    if (mode === "psychic_secret") {
+  // dessine ton fond / arc si ce n'est pas déjà fait avant
+  // (si ton code efface déjà l'écran + dessine l'arc avant les if, laisse-le tel quel)
+
+  drawNeedle(ctx, secret, "rgba(255,255,255,.95)", 10, cx, cy, r);
+    return; // IMPORTANT : on sort pour éviter d'autres dessins qui remettraient 50
+}
 
   drawBaseArc(ctx, cx,cy,r);
 
