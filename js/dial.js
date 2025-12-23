@@ -92,9 +92,28 @@ export function drawDial(ctx, {mode, secret, guesses, playersMap, psychicId, cur
   ctx.fill();
   ctx.restore();
 
-  if(mode === "psychic_word"){
-    drawNeedle(ctx, 50, "rgba(255,255,255,.65)", 4, cx,cy,r);
+  if(mode === "psychic_secret"){
+    // Aiguille blanche FIXE sur le secret (Psychic)
+    drawNeedle(ctx, secret, "rgba(255,255,255,.95)", 10, cx, cy, r);
+
+    ctx.save();
+    ctx.fillStyle = "rgba(255,255,255,.75)";
+    ctx.font = "900 14px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("Position secrète", cx, 92);
+    ctx.restore();
   }
+
+
+
+// Optionnel: label discret
+ctx.save();
+ctx.fillStyle = "rgba(255,255,255,.75)";
+ctx.font = "900 14px Arial";
+ctx.textAlign = "center";
+ctx.fillText("Position secrète", cx, 92);
+ctx.restore();
+}
 
   if(mode === "team"){
     drawNeedle(ctx, currentNeedle, "rgba(255,255,255,.92)", 6, cx,cy,r);
@@ -129,4 +148,4 @@ export function drawDial(ctx, {mode, secret, guesses, playersMap, psychicId, cur
     ctx.fill();
     ctx.restore();
   }
-}
+

@@ -1,3 +1,4 @@
+// js/main.js
 import { loadSettings, saveSettings, settings, getOrCreateMyId, rand, clamp } from "./state.js";
 import { COLOR_CHOICES, CATEGORY_PACKS } from "./settings.js";
 import { drawDial } from "./dial.js";
@@ -48,6 +49,7 @@ const revealNote = document.getElementById("revealNote");
 const scoresDiv = document.getElementById("scores");
 const btnResetScores = document.getElementById("btnResetScores");
 
+/* Multi UI */
 const btnHost = document.getElementById("btnHost");
 const btnJoin = document.getElementById("btnJoin");
 const multiBox = document.getElementById("multiBox");
@@ -160,7 +162,12 @@ btnSaveSettings.onclick = async ()=>{
   }
   saveSettings();
   closeSettings();
-  // Si besoin: pousser settings dans la room (comme ton code initial) -> à ajouter si tu veux.
+
+  // Si tu veux pousser les settings dans la room en live:
+  // (à activer seulement si tu es host + déjà en room)
+  // if(roomCode && roomData && isRoomHost(roomData, myId)){
+  //   // à implémenter côté multiplayer.js si tu veux
+  // }
 };
 
 /* ===== Winner modal ===== */
@@ -171,33 +178,45 @@ btnContinue.onclick = ()=>closeWinner(winnerOverlay);
 btnJoin.onclick = ()=> multiBox.classList.toggle("hidden");
 
 btnHost.onclick = async ()=>{
-  myId = getOrCreateMyId();
-  const name = (prompt("Ton pseudo (host) ?", "Host") || "Host").slice(0,14);
-  const color = COLOR_CHOICES[0].value;
+  try{
+    myId = getOrCreateMyId();
 
-  const code = await createRoom({ myId, hostName: name, hostColor: color, settings });
-  roomCode = code;
+    const name = (prompt("Ton pseudo (host) ?", "Host") || "Host").slice(0,14);
+    const color = COLOR_CHOICES[0].value;
 
-  alert("Code à partager : " + code);
-  attachListener(code);
+    const code = await createRoom({ myId, hostName: name, hostColor: color, settings });
+    roomCode = code;
+
+    alert("Code à partager : " + code);
+    attachListener(code);
+  }catch(e){
+    alert("Erreur host: " + (e?.message || e));
+    console.error(e);
+  }
 };
 
 btnConfirmJoin.onclick = async ()=>{
-  myId = getOrCreateMyId();
-  const code = (roomCodeInput.value || "").trim().toUpperCase();
-  const name = ((playerNameInput.value || "").trim() || "Joueur").slice(0,14);
-  const color = COLOR_CHOICES[rand(0, COLOR_CHOICES.length-1)].value;
+  try{
+    myId = getOrCreateMyId();
 
-  if(code.length !== 4){
-    alert("Le code doit faire 4 caractères.");
-    return;
+    const code = (roomCodeInput.value || "").trim().toUpperCase();
+    const name = ((playerNameInput.value || "").trim() || "Joueur").slice(0,14);
+    const color = COLOR_CHOICES[rand(0, COLOR_CHOICES.length-1)].value;
+
+    if(code.length !== 4){
+      alert("Le code doit faire 4 caractères.");
+      return;
+    }
+
+    const ok = await joinRoom({ myId, code, playerName: name, playerColor: color });
+    if(!ok) return;
+
+    roomCode = code;
+    attachListener(code);
+  }catch(e){
+    alert("Erreur join: " + (e?.message || e));
+    console.error(e);
   }
-
-  const ok = await joinRoom({ myId, code, playerName: name, playerColor: color });
-  if(!ok) return;
-
-  roomCode = code;
-  attachListener(code);
 };
 
 function attachListener(code){
@@ -219,66 +238,122 @@ function attachListener(code){
         + " "
         + (isMyTurnPsychic(roomData, myId) ? "Tu es PSYCHIC." : "");
 
-      // Rendu jeu
+      // ===== Rendu jeu =====
       const phase = roomData.phase || "lobby";
       const category = roomData.category;
       const word = roomData.word;
 
-      if(phase === "lobby"){
+      if (phase === "lobby") {
         setPair(pairDiv, "Lobby", isRoomHost(roomData, myId) ? "Host: lance la manche" : "En attente du host…");
         sliderWrap.classList.add("hidden");
         legendWrap.classList.add("hidden");
         revealNote.classList.add("hidden");
-        drawDial(ctx, {mode:"psychic_word", secret:50, guesses:{}, playersMap:{}, psychicId:roomData.psychicId, currentNeedle:50});
-      } else if(phase === "psychic_word"){
-        setPair(pairDiv, category || "Catégorie", isMyTurnPsychic(roomData, myId) ? "Écris le mot…" : "En attente du Psychic…");
+
+        drawDial(ctx, {
+          mode: "psychic_word",
+          secret: 50,
+          guesses: {},
+          playersMap: {},
+          psychicId: roomData.psychicId,
+          currentNeedle: 50
+        });
+
+      } else if (phase === "psychic_word") {
+        setPair(
+          pairDiv,
+          category || "Catégorie",
+          isMyTurnPsychic(roomData, myId) ? "Écris le mot…" : "En attente du Psychic…"
+        );
+
         sliderWrap.classList.add("hidden");
         legendWrap.classList.add("hidden");
         revealNote.classList.add("hidden");
-        drawDial(ctx, {mode:"psychic_word", secret:50, guesses:{}, playersMap:{}, psychicId:roomData.psychicId, currentNeedle:50});
-      } else if(phase === "team"){
+
+        if (isMyTurnPsychic(roomData, myId)) {
+          // PSYCHIC : voit l'aiguille blanche sur le secret (random) et elle reste fixe
+          drawDial(ctx, {
+            mode: "psychic_secret",
+            secret: roomData.secret,
+            guesses: roomData.guesses || {},
+            playersMap: roomData.players || {},
+            psychicId: roomData.psychicId,
+            currentNeedle: 50
+          });
+        } else {
+          // JOUEURS : aiguille neutre
+          drawDial(ctx, {
+            mode: "psychic_word",
+            secret: 50,
+            guesses: {},
+            playersMap: {},
+            psychicId: roomData.psychicId,
+            currentNeedle: 50
+          });
+        }
+
+      } else if (phase === "team") {
         setPair(pairDiv, category || "Catégorie", word || "Mot");
+
         legendWrap.classList.add("hidden");
         revealNote.classList.add("hidden");
-        sliderWrap.classList.toggle("hidden", isMyTurnPsychic(roomData, myId));
-        drawDial(ctx, {
-          mode:"team",
-          secret:roomData.secret,
-          guesses:roomData.guesses || {},
-          playersMap:roomData.players || {},
-          psychicId:roomData.psychicId,
-          currentNeedle
-        });
+
+        if (isMyTurnPsychic(roomData, myId)) {
+          // PSYCHIC : aiguille blanche FIXE sur le secret
+          sliderWrap.classList.add("hidden");
+
+          drawDial(ctx, {
+            mode: "psychic_secret",
+            secret: roomData.secret,
+            guesses: roomData.guesses || {},
+            playersMap: roomData.players || {},
+            psychicId: roomData.psychicId,
+            currentNeedle: 50
+          });
+        } else {
+          // JOUEURS : ils placent leur aiguille
+          sliderWrap.classList.remove("hidden");
+
+          drawDial(ctx, {
+            mode: "team",
+            secret: roomData.secret,
+            guesses: roomData.guesses || {},
+            playersMap: roomData.players || {},
+            psychicId: roomData.psychicId,
+            currentNeedle
+          });
+        }
 
         // Host auto reveal + anti double-score dans multiplayer.js
-        if(isRoomHost(roomData, myId)){
+        if (isRoomHost(roomData, myId)) {
           await hostComputeRevealAndScore({ roomCode, roomData });
         }
-      } else if(phase === "reveal"){
+
+      } else if (phase === "reveal") {
         setPair(pairDiv, category || "Catégorie", word || "Mot");
         sliderWrap.classList.add("hidden");
         legendWrap.classList.remove("hidden");
         revealNote.classList.remove("hidden");
+
         drawDial(ctx, {
-          mode:"reveal",
-          secret:roomData.secret,
-          guesses:roomData.guesses || {},
-          playersMap:roomData.players || {},
-          psychicId:roomData.psychicId,
-          currentNeedle:50
+          mode: "reveal",
+          secret: roomData.secret,
+          guesses: roomData.guesses || {},
+          playersMap: roomData.players || {},
+          psychicId: roomData.psychicId,
+          currentNeedle: 50
         });
 
         // Victoire
         const target = Number(roomData.pointsToWin || 20);
-        if(Number.isFinite(target) && target > 0){
+        if (Number.isFinite(target) && target > 0) {
           let best = null;
-          for(const [pid, p] of Object.entries(roomData.players || {})){
+          for (const [pid, p] of Object.entries(roomData.players || {})) {
             const s = p.score || 0;
-            if(s >= target && (!best || s > best.score)){
-              best = {pid, name:p.name||pid, score:s};
+            if (s >= target && (!best || s > best.score)) {
+              best = { pid, name: p.name || pid, score: s };
             }
           }
-          if(best){
+          if (best) {
             openWinner(winnerOverlay, winnerTitle, winnerSub, best.name, best.score, target);
           }
         }
@@ -426,7 +501,17 @@ setPair(pairDiv, null, null);
 sliderWrap.classList.add("hidden");
 legendWrap.classList.add("hidden");
 revealNote.classList.add("hidden");
-drawDial(ctx, {mode:"psychic_word", secret:50, guesses:{}, playersMap:{}, psychicId:"", currentNeedle:50});
+
+// état initial (hors room)
+drawDial(ctx, {
+  mode:"psychic_word",
+  secret:50,
+  guesses:{},
+  playersMap:{},
+  psychicId:"",
+  currentNeedle:50
+});
+
 btnAction.textContent = "Crée ou rejoins une room";
 btnAction.onclick = null;
 syncSlider();
