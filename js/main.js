@@ -1,4 +1,5 @@
 // js/main.js
+console.log("MAIN VERSION = 2025-12-23_01");
 import { loadSettings, saveSettings, settings, getOrCreateMyId, rand, clamp } from "./state.js";
 import { COLOR_CHOICES, CATEGORY_PACKS } from "./settings.js";
 import { drawDial } from "./dial.js";
