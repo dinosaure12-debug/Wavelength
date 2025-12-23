@@ -329,6 +329,38 @@ select:focus, input[type="text"]:focus{
     <button id="btnSettings" class="ghost">Paramètres</button>
     <button id="actionBtn" class="primary">Nouvelle partie</button>
   </div>
+  <div class="panel">
+  <div style="font-weight:950; font-size:16px; margin-bottom:10px;">Multijoueur</div>
+
+  <div class="row" style="gap:10px;">
+    <button id="btnHost" class="primary" style="flex:1;">Créer une room</button>
+    <button id="btnJoin" class="ghost" style="flex:1;">Rejoindre</button>
+  </div>
+
+  <div id="multiBox" style="margin-top:12px;" class="hidden">
+    <div class="row">
+      <div class="field">
+        <label>Code room</label>
+        <input id="roomCodeInput" type="text" placeholder="ABCD" maxlength="4" />
+      </div>
+      <div class="field">
+        <label>Pseudo</label>
+        <input id="playerNameInput" type="text" placeholder="Ton pseudo" maxlength="14" />
+      </div>
+    </div>
+
+    <div class="row" style="justify-content:flex-end;">
+      <button id="btnConfirmJoin" class="primary">OK</button>
+    </div>
+  </div>
+
+  <div id="roomInfo" class="hidden" style="margin-top:12px;">
+    <div class="badge">Room : <b id="roomCodeLabel">----</b></div>
+    <div class="small" style="margin-top:8px;">Joueurs connectés :</div>
+    <div id="lobbyPlayers" style="margin-top:8px; display:flex; flex-direction:column; gap:8px;"></div>
+  </div>
+</div>
+
 
   <div class="panel" id="scoresPanel">
     <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
@@ -1299,49 +1331,161 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+  // ================= MULTI STATE =================
+let roomCode = null;
+let myId = null;
+let isHost = false;
+
+// DOM multi
+const btnHost = document.getElementById("btnHost");
+const btnJoin = document.getElementById("btnJoin");
+const multiBox = document.getElementById("multiBox");
+const roomCodeInput = document.getElementById("roomCodeInput");
+const playerNameInput = document.getElementById("playerNameInput");
+const btnConfirmJoin = document.getElementById("btnConfirmJoin");
+const roomInfo = document.getElementById("roomInfo");
+const roomCodeLabel = document.getElementById("roomCodeLabel");
+const lobbyPlayers = document.getElementById("lobbyPlayers");
+
+// util id joueur (persistant)
+function getOrCreateMyId(){
+  const k = "wl_myId_v1";
+  let v = localStorage.getItem(k);
+  if(!v){
+    v = "p_" + Math.random().toString(36).slice(2,10);
+    localStorage.setItem(k, v);
+  }
+  return v;
+}
+
+function renderLobby(playersMap){
+  lobbyPlayers.innerHTML = "";
+  const entries = Object.entries(playersMap || {});
+  if(entries.length === 0){
+    lobbyPlayers.innerHTML = `<div class="small">Personne dans la room.</div>`;
+    return;
+  }
+
+  for(const [pid, p] of entries){
+    const line = document.createElement("div");
+    line.className = "scoreline";
+    line.innerHTML = `
+      <div class="scoreLeft">
+        <span class="colorDot" style="background:${p.color || "#999"}"></span>
+        <span class="nameText">${p.name || pid}${pid === roomHostIdCache ? " (Host)" : ""}${pid === myId ? " (Toi)" : ""}</span>
+      </div>
+      <div class="scorePts">${p.score ?? 0} pts</div>
+    `;
+    lobbyPlayers.appendChild(line);
+  }
+}
+
+// cache hostId pour affichage
+let roomHostIdCache = null;
+createRoom("Host").then(code => alert("Code de la room : " + code));
+function showRoomUI(code){
+  roomCode = code;
+  roomCodeLabel.textContent = code;
+  roomInfo.classList.remove("hidden");
+  multiBox.classList.add("hidden");
+}
+  
+  
 
   function generateRoomCode() {
   return Math.random().toString(36).substring(2, 6).toUpperCase();
 }
 
-async function createRoom(hostName) {
-  const roomCode = generateRoomCode();
-  const roomRef = doc(db, "rooms", roomCode);
+async function createRoom(hostName, hostId, hostColor){
+  const code = generateRoomCode();
+  const roomRef = doc(db, "rooms", code);
 
   await setDoc(roomRef, {
-    hostId: "host",
+    hostId: hostId,
     phase: "lobby",
     category: null,
     secret: null,
+    guesses: {},
     players: {
-      host: {
-        name: hostName,
-        score: 0
-      }
+      [hostId]: { name: hostName, color: hostColor, score: 0 }
     },
     createdAt: Date.now()
   });
 
-  return roomCode;
+  return code;
+}
+  async function joinRoom(code, playerId, playerName, playerColor){
+  const roomRef = doc(db, "rooms", code);
+  const snap = await getDoc(roomRef);
+
+  if (!snap.exists()) {
+    alert("Room inexistante");
+    return false;
+  }
+
+  await updateDoc(roomRef, {
+    [`players.${playerId}`]: { name: playerName, color: playerColor, score: 0 }
+  });
+
+  return true;
 }
 
-createRoom("Host").then(code => alert("Code de la room : " + code));
-function listenRoom(roomCode) {
-  const roomRef = doc(db, "rooms", roomCode);
+function listenRoom(code) {
+  const roomRef = doc(db, "rooms", code);
 
-  onSnapshot(roomRef, (docSnap) => {
-    if (!docSnap.exists()) return;
+  onSnapshot(roomRef, (snap) => {
+    if (!snap.exists()) return;
 
-    const data = docSnap.data();
-    console.log("ROOM UPDATE", data);
+    const data = snap.data();
+    roomHostIdCache = data.hostId || null;
 
-    // plus tard :
-    // phase = data.phase
-    // secret = data.secret
-    // players = data.players
-    // updateUI()
+    // Affichage lobby
+    renderLobby(data.players || {});
+
+    // Ici plus tard : synchroniser phase/secret/category/guesses...
+    // phase = data.phase; secret = data.secret; currentCategory = data.category; guesses = data.guesses...
+    // updateUI();
   });
 }
+btnHost.onclick = async () => {
+  myId = getOrCreateMyId();
+  isHost = true;
+
+  const name = prompt("Ton pseudo (host) ?", "Host") || "Host";
+  const color = COLOR_CHOICES[0].value; // tu pourras choisir plus tard
+
+  const code = await createRoom(name.slice(0,14), myId, color);
+
+  showRoomUI(code);
+  listenRoom(code);
+
+  alert("Code à partager : " + code);
+};
+
+btnJoin.onclick = () => {
+  multiBox.classList.toggle("hidden");
+};
+
+btnConfirmJoin.onclick = async () => {
+  myId = getOrCreateMyId();
+  isHost = false;
+
+  const code = (roomCodeInput.value || "").trim().toUpperCase();
+  const name = (playerNameInput.value || "").trim() || "Joueur";
+  const color = COLOR_CHOICES[1].value;
+
+  if(code.length !== 4){
+    alert("Le code doit faire 4 caractères.");
+    return;
+  }
+
+  const ok = await joinRoom(code, myId, name.slice(0,14), color);
+  if(!ok) return;
+
+  showRoomUI(code);
+  listenRoom(code);
+};
+
 
 
   // Rendre Firestore accessible partout dans ton jeu
